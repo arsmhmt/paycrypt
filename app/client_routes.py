@@ -63,6 +63,19 @@ def get_client_balance(client_id):
 # Create client blueprint first
 client_bp = Blueprint('client', __name__, url_prefix='/client', template_folder='templates/client')
 
+class SimplePagination:
+    """A simple pagination class that mimics Flask-SQLAlchemy's pagination"""
+    def __init__(self, items, page, per_page, total):
+        self.items = items
+        self.page = page
+        self.per_page = per_page
+        self.total = total
+        self.pages = (total + per_page - 1) // per_page if per_page > 0 else 1
+        self.has_next = page * per_page < total
+        self.has_prev = page > 1
+        self.next_num = page + 1 if self.has_next else None
+        self.prev_num = page - 1 if self.has_prev else None
+
 @client_bp.route('/login', methods=['GET', 'POST'])
 @csrf.exempt  # Completely exempt login route from CSRF protection
 def login():
@@ -334,15 +347,114 @@ def dashboard(client=None):  # Accept client from decorator
         page = request.args.get('page', 1, type=int)
         per_page = current_app.config.get('ITEMS_PER_PAGE', 10)
         
-        # Get recent payments
-        payments = Payment.query.filter_by(client_id=client.id)\
-            .order_by(Payment.created_at.desc())\
-            .paginate(page=page, per_page=per_page)
+        # Get recent payments - handle case-insensitive status
+        try:
+            # First try with SQLAlchemy ORM
+            payments = Payment.query.filter(Payment.client_id == client.id)\
+                .order_by(Payment.created_at.desc())\
+                .paginate(page=page, per_page=per_page)
+        except Exception as e:
+            current_app.logger.error(f"Error querying payments with ORM: {str(e)}")
+            
+            # Fallback to raw SQL with proper type conversion
+            from sqlalchemy import text, DateTime
+            from datetime import datetime
+            
+            # First get total count for pagination
+            count = db.session.execute(
+                text("SELECT COUNT(*) FROM payments WHERE client_id = :client_id"),
+                {'client_id': client.id}
+            ).scalar()
+            
+            # Then get paginated results
+            offset = (page - 1) * per_page
+            stmt = text("""
+                SELECT * FROM payments 
+                WHERE client_id = :client_id 
+                ORDER BY created_at DESC
+                LIMIT :per_page OFFSET :offset
+            """)
+            
+            result = db.session.execute(stmt, {
+                'client_id': client.id,
+                'per_page': per_page,
+                'offset': offset
+            })
+            
+            # Convert Row objects to dictionaries and parse dates
+            payments_data = []
+            for row in result.mappings():
+                row_dict = dict(row)
+                # Convert string dates to datetime objects and handle enums
+                for date_field in ['created_at', 'updated_at', 'expires_at', 'rate_expiry']:
+                    if date_field in row_dict and row_dict[date_field] and isinstance(row_dict[date_field], str):
+                        try:
+                            row_dict[date_field] = datetime.fromisoformat(row_dict[date_field])
+                        except (ValueError, TypeError):
+                            pass
+                
+                # Ensure status is a string (not an enum) for template compatibility
+                if 'status' in row_dict and not isinstance(row_dict['status'], str):
+                    row_dict['status'] = str(row_dict['status'])
+                
+                payments_data.append(row_dict)
+            
+            # Use the SimplePagination class from the top of the file
+            
+            payments = SimplePagination(payments_data, page, per_page, count)
         
-        # Get recent withdrawals
-        withdrawals = WithdrawalRequest.query.filter_by(client_id=client.id)\
-            .order_by(WithdrawalRequest.created_at.desc())\
-            .paginate(page=page, per_page=per_page)
+        # Get recent withdrawals with error handling
+        try:
+            withdrawals = WithdrawalRequest.query.filter_by(client_id=client.id)\
+                .order_by(WithdrawalRequest.created_at.desc())\
+                .paginate(page=page, per_page=per_page)
+        except Exception as e:
+            current_app.logger.error(f"Error querying withdrawals with ORM: {str(e)}")
+            # Fallback to raw SQL with proper type conversion
+            from sqlalchemy import text
+            from datetime import datetime
+            
+            # Get total count for pagination
+            count = db.session.execute(
+                text("SELECT COUNT(*) FROM withdrawal_requests WHERE client_id = :client_id"),
+                {'client_id': client.id}
+            ).scalar()
+            
+            # Get paginated results
+            offset = (page - 1) * per_page
+            stmt = text("""
+                SELECT * FROM withdrawal_requests 
+                WHERE client_id = :client_id 
+                ORDER BY created_at DESC
+                LIMIT :per_page OFFSET :offset
+            """)
+            
+            result = db.session.execute(stmt, {
+                'client_id': client.id,
+                'per_page': per_page,
+                'offset': offset
+            })
+            
+            # Convert Row objects to dictionaries and parse dates
+            withdrawals_data = []
+            for row in result.mappings():
+                row_dict = dict(row)
+                # Convert string dates to datetime objects
+                for date_field in ['created_at', 'updated_at', 'processed_at']:
+                    if date_field in row_dict and row_dict[date_field] and isinstance(row_dict[date_field], str):
+                        try:
+                            row_dict[date_field] = datetime.fromisoformat(row_dict[date_field])
+                        except (ValueError, TypeError):
+                            pass
+                
+                # Ensure status is a string (not an enum) for template compatibility
+                if 'status' in row_dict and not isinstance(row_dict['status'], str):
+                    row_dict['status'] = str(row_dict['status'])
+                
+                withdrawals_data.append(row_dict)
+            
+            # Use the same SimplePagination class
+            withdrawals = SimplePagination(withdrawals_data, page, per_page, count)
         
         # Calculate balance and commissions
         balance = FinanceCalculator.calculate_client_balance(client.id)
@@ -402,6 +514,8 @@ def dashboard(client=None):  # Accept client from decorator
                              api_stats=api_stats)
     except Exception as e:
         current_app.logger.error(f"DASHBOARD ERROR: {str(e)}\n{traceback.format_exc()}")
+        flash('An error occurred while loading the dashboard. Please try again later.', 'error')
+        return redirect(url_for('client.logout'))  # Redirect to logout to clear any session issues
 
 @client_bp.route('/payments/new', methods=['GET', 'POST'])
 @login_required

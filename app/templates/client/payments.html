@@ -20,7 +20,12 @@
             <tr>
                 <td>{{ payment.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
                 <td>{{ payment.amount }}</td>
-                <td>{{ payment.status }}</td>
+                <td>
+                    {% set status_value = payment.status.value if payment.status and hasattr(payment.status, 'value') else (payment.status|string|lower if payment.status else 'unknown') %}
+                    <span class="badge bg-{{ {'completed':'success','pending':'warning','failed':'danger', 'approved': 'success', 'rejected': 'danger', 'cancelled': 'secondary'}.get(status_value, 'secondary') }}">
+                        {{ status_value|title }}
+                    </span>
+                </td>
                 <td><a href="{{ url_for('client.view_payment', payment_id=payment.id) }}"
                         class="btn btn-sm btn-outline-primary">{{ _('View') }}</a></td>
             </tr>

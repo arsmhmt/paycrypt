@@ -130,8 +130,9 @@
                 <h6 class="card-title mb-0">
                     <i class="bi bi-arrow-up-circle me-2"></i>{{ request.currency }} {{ "%.6f"|format(request.amount) }}
                 </h6>
-                <span class="status-badge status-{{ request.status.value }}">
-                    {{ request.status.value|title }}
+                {% set status_value = request.status.value if request.status and hasattr(request.status, 'value') else (request.status|string|lower if request.status else 'unknown') %}
+                <span class="status-badge status-{{ status_value }}">
+                    {{ status_value|title }}
                 </span>
             </div>
             <div class="card-body">
@@ -167,15 +168,15 @@
                     <span class="small">{{ request.created_at.strftime('%Y-%m-%d %H:%M UTC') }}</span>
                 </div>
 
-                {% if request.status.value in ['approved', 'completed'] and request.approved_at %}
+                {% set status_value = request.status.value if request.status and hasattr(request.status, 'value') else (request.status|string|lower if request.status else 'unknown') %}
+                {% if status_value in ['approved', 'completed'] and request.approved_at %}
                 <div class="mb-3">
-                    <small class="text-muted d-block mb-1">{{ 'Completed' if request.status.value == 'completed' else
-                        'Approved' }}:</small>
+                    <small class="text-muted d-block mb-1">{{ 'Completed' if status_value == 'completed' else 'Approved' }}:</small>
                     <span class="small">{{ request.approved_at.strftime('%Y-%m-%d %H:%M UTC') }}</span>
                 </div>
                 {% endif %}
 
-                {% if request.status.value == 'rejected' and request.rejection_reason %}
+                {% if status_value == 'rejected' and request.rejection_reason %}
                 <div class="mb-3">
                     <small class="text-muted d-block mb-1">Rejection Reason:</small>
                     <div class="alert alert-danger py-2 mb-0">

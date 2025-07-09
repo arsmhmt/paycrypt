@@ -1,10 +1,3 @@
-from alembic import op
-import sqlalchemy as sa
-
-def upgrade():
-op.add_column('client_packages', sa.Column('slug', sa.String(length=64), nullable=True))
-op.create_unique_constraint('uq_client_packages_slug', 'client_packages', ['slug'])
-
 {% extends 'client/base.html' %}
 
 {% block title %}{{ _('Dashboard') }} - {{ client.company_name }}{% endblock %}
@@ -207,12 +200,19 @@ op.create_unique_constraint('uq_client_packages_slug', 'client_packages', ['slug
                                 {% for payment in payments.items[:5] %}
                                 <tr>
                                     <td>{{ payment.created_at.strftime('%b %d, %Y %H:%M') }}</td>
-                                    <td>{{ payment.amount }} <span class="text-muted">{{ payment.currency or 'BTC'
-                                            }}</span></td>
+                                    <td>{{ payment.amount }} <span class="text-muted">{{ payment.currency or 'BTC' }}</span></td>
                                     <td>
-                                        <span
-                                            class="badge bg-{{ {'completed':'success','pending':'warning','failed':'danger'}.get((payment.status.value if payment.status else 'unknown'), 'secondary') }}">
-                                            {{ (payment.status.value if payment.status else _('Unknown')).title() }}
+                                        {% set status_value = payment.status|string|lower %}
+                                        {% set status_class = {
+                                            'completed': 'success',
+                                            'pending': 'warning',
+                                            'failed': 'danger',
+                                            'approved': 'success',
+                                            'rejected': 'danger',
+                                            'cancelled': 'secondary'
+                                        } %}
+                                        <span class="badge bg-{{ status_class.get(status_value, 'secondary') }}">
+                                            {{ status_value|title }}
                                         </span>
                                     </td>
                                     <td>
@@ -474,9 +474,16 @@ op.create_unique_constraint('uq_client_packages_slug', 'client_packages', ['slug
                 <div class="row mt-2">
                     <div class="col-6"><strong>{{ _('Status:') }}</strong></div>
                     <div class="col-6">
-                        <span
-                            class="badge bg-{{ {'completed':'success','pending':'warning','failed':'danger'}.get((payment.status.value if payment.status else 'unknown'), 'secondary') }}">
-                            {{ (payment.status.value if payment.status else _('Unknown')).title() }}
+                        {% set status_value = payment.status|string|lower %}
+                        <span class="badge bg-{{ {
+                            'completed': 'success',
+                            'pending': 'warning',
+                            'failed': 'danger',
+                            'approved': 'success',
+                            'rejected': 'danger',
+                            'cancelled': 'secondary'
+                        }.get(status_value, 'secondary') }}">
+                            {{ status_value|title }}
                         </span>
                     </div>
                 </div>
