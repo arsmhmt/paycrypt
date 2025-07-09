@@ -1,0 +1,16 @@
+{
+  "checks": [
+    {
+      "name": "PayCrypt Health Check",
+      "host": "paycrypt.online",
+      "type": "http",
+      "url": "/health",
+      "encryption": true,
+      "port": 443,
+      "shouldcontain": "healthy",
+      "sendnotificationwhendown": 2,
+      "notifyagainevery": 5,
+      "notifywhenbackup": true
+    }
+  ]
+}

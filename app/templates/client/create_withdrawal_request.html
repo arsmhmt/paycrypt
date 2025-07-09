@@ -1,0 +1,420 @@
+{% extends "client/base.html" %}
+
+{% block title %}Create Withdrawal Request - PayCrypt{% endblock %}
+
+{% block styles %}
+<style>
+    .form-section {
+        background: #f8f9fc;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid #e3e6f0;
+    }
+
+    .currency-selector {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .currency-option {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        border: 2px solid #e3e6f0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+        flex-direction: column;
+    }
+
+    .currency-option:hover {
+        border-color: var(--orange);
+        background: rgba(255, 107, 53, 0.05);
+    }
+
+    .currency-option.selected {
+        border-color: var(--orange);
+        background: rgba(255, 107, 53, 0.1);
+        color: var(--orange);
+    }
+
+    .currency-icon {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .critical-notice {
+        background: linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(255, 107, 53, 0.05) 100%);
+        border: 1px solid rgba(255, 107, 53, 0.2);
+        color: #8B4513;
+    }
+
+    .address-preview {
+        font-family: 'Courier New', monospace;
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 0.75rem;
+        font-size: 0.875rem;
+        word-break: break-all;
+    }
+
+    .amount-calculator {
+        background: #e9ecef;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">
+        <i class="bi bi-plus-circle me-2 text-primary"></i>Create Withdrawal Request
+    </h1>
+    <div>
+        <a href="{{ url_for('client.withdrawal_requests') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i>Back to Requests
+        </a>
+    </div>
+</div>
+
+<!-- Critical Notice -->
+<div class="alert critical-notice mb-4">
+    <h5 class="alert-heading">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>Important: Manual Processing Required
+    </h5>
+    <p class="mb-2">
+        <strong>This withdrawal request will be manually reviewed and processed by our team.</strong>
+    </p>
+    <ul class="mb-0 small">
+        <li>Ensure the user wallet address is correct and supports the selected currency</li>
+        <li>Processing typically takes 1-3 business days</li>
+        <li>You'll receive email notifications for status updates</li>
+        <li>Verify the user's identity before creating the request</li>
+    </ul>
+</div>
+
+<!-- Create Withdrawal Request Form -->
+<div class="row">
+    <div class="col-lg-8">
+        <form id="withdrawalRequestForm" method="POST">
+            {{ csrf_token() }}
+
+            <!-- Currency Selection -->
+            <div class="form-section">
+                <h5 class="mb-3">
+                    <i class="bi bi-currency-exchange me-2"></i>Select Currency
+                </h5>
+                <div class="currency-selector">
+                    <div class="currency-option" data-currency="BTC">
+                        <div class="currency-icon">₿</div>
+                        <div class="fw-bold">BTC</div>
+                        <small class="text-muted">Bitcoin</small>
+                    </div>
+                    <div class="currency-option" data-currency="ETH">
+                        <div class="currency-icon">Ξ</div>
+                        <div class="fw-bold">ETH</div>
+                        <small class="text-muted">Ethereum</small>
+                    </div>
+                    <div class="currency-option" data-currency="USDT">
+                        <div class="currency-icon">₮</div>
+                        <div class="fw-bold">USDT</div>
+                        <small class="text-muted">Tether</small>
+                    </div>
+                    <div class="currency-option" data-currency="USDC">
+                        <div class="currency-icon">$</div>
+                        <div class="fw-bold">USDC</div>
+                        <small class="text-muted">USD Coin</small>
+                    </div>
+                    <div class="currency-option" data-currency="BNB">
+                        <div class="currency-icon">🔸</div>
+                        <div class="fw-bold">BNB</div>
+                        <small class="text-muted">Binance Coin</small>
+                    </div>
+                    <div class="currency-option" data-currency="ADA">
+                        <div class="currency-icon">₳</div>
+                        <div class="fw-bold">ADA</div>
+                        <small class="text-muted">Cardano</small>
+                    </div>
+                </div>
+                <input type="hidden" id="selectedCurrency" name="currency" required>
+            </div>
+
+            <!-- Amount -->
+            <div class="form-section">
+                <h5 class="mb-3">
+                    <i class="bi bi-calculator me-2"></i>Withdrawal Amount
+                </h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <label for="amount" class="form-label">Amount</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="amount" name="amount" step="0.00000001"
+                                min="0.00000001" required placeholder="0.00000000">
+                            <span class="input-group-text" id="currencySymbol">-</span>
+                        </div>
+                        <div class="form-text">Enter the exact amount to withdraw</div>
+                    </div>
+                </div>
+
+                <!-- Amount Calculator -->
+                <div class="amount-calculator" id="amountCalculator" style="display: none;">
+                    <h6>Withdrawal Summary</h6>
+                    <div class="row">
+                        <div class="col-6">
+                            <small class="text-muted">Requested Amount:</small>
+                            <div class="fw-bold" id="requestedAmount">0.00000000</div>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Estimated Fee:</small>
+                            <div class="fw-bold text-warning" id="estimatedFee">~0.00000000</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Information -->
+            <div class="form-section">
+                <h5 class="mb-3">
+                    <i class="bi bi-person-check me-2"></i>User Information
+                </h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <label for="userId" class="form-label">User ID (Optional)</label>
+                        <input type="text" class="form-control" id="userId" name="user_id"
+                            placeholder="e.g., user123, email@example.com">
+                        <div class="form-text">Internal user identifier for your records</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Destination Wallet -->
+            <div class="form-section">
+                <h5 class="mb-3">
+                    <i class="bi bi-wallet2 me-2"></i>Destination Wallet
+                </h5>
+                <div class="mb-3">
+                    <label for="userWalletAddress" class="form-label">User's Wallet Address</label>
+                    <textarea class="form-control" id="userWalletAddress" name="user_wallet_address" rows="3" required
+                        placeholder="Enter the user's wallet address where funds should be sent"></textarea>
+                    <div class="form-text">
+                        <i class="bi bi-exclamation-triangle text-warning me-1"></i>
+                        <strong>Important:</strong> Verify this address is correct and supports the selected currency.
+                        Incorrect addresses may result in permanent loss of funds.
+                    </div>
+                </div>
+
+                <!-- Address Preview -->
+                <div id="addressPreview" style="display: none;">
+                    <label class="form-label">Address Preview:</label>
+                    <div class="address-preview" id="addressDisplay"></div>
+                </div>
+            </div>
+
+            <!-- Additional Notes -->
+            <div class="form-section">
+                <h5 class="mb-3">
+                    <i class="bi bi-chat-text me-2"></i>Additional Information
+                </h5>
+                <div class="mb-3">
+                    <label for="notes" class="form-label">Notes (Optional)</label>
+                    <textarea class="form-control" id="notes" name="notes" rows="3"
+                        placeholder="Any additional information for the admin team..."></textarea>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="d-flex justify-content-between">
+                <a href="{{ url_for('client.withdrawal_requests') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle me-2"></i>Cancel
+                </a>
+                <button type="submit" class="btn btn-primary" id="submitBtn">
+                    <i class="bi bi-check-circle me-2"></i>Create Withdrawal Request
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Help Sidebar -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="bi bi-question-circle me-2"></i>Need Help?
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <h6>Processing Time</h6>
+                    <p class="small text-muted mb-0">Withdrawal requests are manually reviewed and typically processed
+                        within 1-3 business days.</p>
+                </div>
+
+                <div class="mb-3">
+                    <h6>Supported Networks</h6>
+                    <ul class="small text-muted mb-0">
+                        <li><strong>BTC:</strong> Bitcoin Network</li>
+                        <li><strong>ETH:</strong> Ethereum Network</li>
+                        <li><strong>USDT:</strong> ERC-20, TRC-20</li>
+                        <li><strong>USDC:</strong> ERC-20</li>
+                        <li><strong>BNB:</strong> BSC Network</li>
+                        <li><strong>ADA:</strong> Cardano Network</li>
+                    </ul>
+                </div>
+
+                <div class="mb-3">
+                    <h6>Important Notes</h6>
+                    <ul class="small text-muted mb-0">
+                        <li>Double-check wallet addresses</li>
+                        <li>Ensure network compatibility</li>
+                        <li>Minimum amounts may apply</li>
+                        <li>Network fees are estimated</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card-footer">
+                <a href="{{ url_for('client.support') }}" class="btn btn-outline-primary btn-sm w-100">
+                    <i class="bi bi-headset me-2"></i>Contact Support
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    // Currency selection
+    document.querySelectorAll('.currency-option').forEach(option => {
+        option.addEventListener('click', function () {
+            // Remove selection from all options
+            document.querySelectorAll('.currency-option').forEach(opt => opt.classList.remove('selected'));
+
+            // Select this option
+            this.classList.add('selected');
+
+            // Update hidden input
+            const currency = this.dataset.currency;
+            document.getElementById('selectedCurrency').value = currency;
+            document.getElementById('currencySymbol').textContent = currency;
+
+            // Update amount calculator
+            updateAmountCalculator();
+        });
+    });
+
+    // Amount input handler
+    document.getElementById('amount').addEventListener('input', updateAmountCalculator);
+
+    // Address preview
+    document.getElementById('userWalletAddress').addEventListener('input', function () {
+        const address = this.value.trim();
+        const preview = document.getElementById('addressPreview');
+        const display = document.getElementById('addressDisplay');
+
+        if (address) {
+            display.textContent = address;
+            preview.style.display = 'block';
+        } else {
+            preview.style.display = 'none';
+        }
+    });
+
+    function updateAmountCalculator() {
+        const amount = parseFloat(document.getElementById('amount').value) || 0;
+        const currency = document.getElementById('selectedCurrency').value;
+        const calculator = document.getElementById('amountCalculator');
+
+        if (amount > 0 && currency) {
+            // Estimate fees based on currency
+            const feeRates = {
+                'BTC': 0.0005,
+                'ETH': 0.003,
+                'USDT': 1.0,
+                'USDC': 1.0,
+                'BNB': 0.0005,
+                'ADA': 0.17
+            };
+
+            const estimatedFee = feeRates[currency] || 0;
+
+            document.getElementById('requestedAmount').textContent = amount.toFixed(8) + ' ' + currency;
+            document.getElementById('estimatedFee').textContent = '~' + estimatedFee.toFixed(8) + ' ' + currency;
+
+            calculator.style.display = 'block';
+        } else {
+            calculator.style.display = 'none';
+        }
+    }
+
+    // Form submission
+    document.getElementById('withdrawalRequestForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const submitBtn = document.getElementById('submitBtn');
+        const originalText = submitBtn.innerHTML;
+
+        // Validation
+        const currency = document.getElementById('selectedCurrency').value;
+        const amount = parseFloat(document.getElementById('amount').value);
+        const address = document.getElementById('userWalletAddress').value.trim();
+
+        if (!currency) {
+            showToast('Please select a currency', 'error');
+            return;
+        }
+
+        if (!amount || amount <= 0) {
+            showToast('Please enter a valid amount', 'error');
+            return;
+        }
+
+        if (!address) {
+            showToast('Please enter the user wallet address', 'error');
+            return;
+        }
+
+        // Show loading state
+        submitBtn.innerHTML = '<i class="spinner-border spinner-border-sm me-2"></i>Creating Request...';
+        submitBtn.disabled = true;
+
+        // Submit form
+        const formData = new FormData(this);
+
+        fetch(this.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('Withdrawal request created successfully!', 'success');
+                    setTimeout(() => {
+                        window.location.href = "{{ url_for('client.withdrawal_requests') }}";
+                    }, 1500);
+                } else {
+                    showToast(data.message || 'Error creating withdrawal request', 'error');
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }
+            })
+            .catch(error => {
+                showToast('Network error. Please try again.', 'error');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                console.error('Error:', error);
+            });
+    });
+</script>
+{% endblock %}

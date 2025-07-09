@@ -1,0 +1,21 @@
+
+# PayCrypt Production Monitoring Cron Jobs
+# Add these to your crontab with: crontab -e
+
+# Check usage alerts every hour
+0 * * * * cd /path/to/cpgateway && /usr/bin/python3 -m flask check-usage-alerts >> /var/log/paycrypt/usage_alerts.log 2>&1
+
+# Generate log analysis report daily at 6 AM
+0 6 * * * cd /path/to/cpgateway && /usr/bin/python3 monitoring/log_monitor.py >> /var/log/paycrypt/monitoring.log 2>&1
+
+# Check health endpoint every 5 minutes (basic monitoring)
+*/5 * * * * curl -f https://paycrypt.online/health > /dev/null 2>&1 || echo "Health check failed at $(date)" >> /var/log/paycrypt/health_failures.log
+
+# Reset monthly usage (first day of month at 1 AM)
+0 1 1 * * cd /path/to/cpgateway && /usr/bin/python3 -m flask reset-monthly-usage >> /var/log/paycrypt/monthly_reset.log 2>&1
+
+# Weekly usage summary report (Mondays at 9 AM)
+0 9 * * 1 cd /path/to/cpgateway && /usr/bin/python3 -m flask generate-usage-report >> /var/log/paycrypt/weekly_reports.log 2>&1
+
+# Cleanup old log files (monthly, first Sunday at 2 AM)
+0 2 * * 0 [ $(date +\%d) -le 7 ] && find /var/log/paycrypt/ -name "*.log" -mtime +30 -delete

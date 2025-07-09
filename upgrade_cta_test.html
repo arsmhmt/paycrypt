@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta charset="UTF-8">
+        <title>Upgrade CTA Test</title>
+        <style>
+            body {
+                background: #212529;
+                color: white;
+                font-family: 'Inter', sans-serif;
+                padding: 20px;
+            }
+
+            .test-container {
+                width: 280px;
+                background: #212529;
+                padding: 20px;
+                border: 1px solid #333;
+            }
+
+            /* Compact Upgrade CTA Styles */
+            .upgrade-cta {
+                background: linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(255, 107, 53, 0.05) 100%);
+                border: 1px solid rgba(255, 107, 53, 0.2);
+                border-radius: 8px;
+                padding: 0.75rem;
+                margin: 0 0.75rem;
+                text-align: center;
+            }
+
+            .upgrade-header {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: 600;
+                font-size: 0.7rem;
+                margin-bottom: 0.4rem;
+                color: #FF6B35;
+            }
+
+            .upgrade-header i {
+                margin-right: 0.35rem;
+                font-size: 0.65rem;
+            }
+
+            .upgrade-text {
+                font-size: 0.65rem;
+                color: rgba(255, 255, 255, 0.8);
+                line-height: 1.2;
+                margin-bottom: 0.6rem;
+            }
+
+            .btn-upgrade {
+                background: #FF6B35;
+                color: white;
+                border: none;
+                padding: 0.4rem 0.75rem;
+                border-radius: 5px;
+                font-size: 0.65rem;
+                font-weight: 600;
+                transition: all 0.3s ease;
+                text-decoration: none;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                cursor: pointer;
+            }
+
+            .btn-upgrade:hover {
+                background: #e05d2e;
+                color: white;
+                transform: translateY(-1px);
+                box-shadow: 0 3px 8px rgba(255, 107, 53, 0.3);
+            }
+
+            .btn-upgrade i {
+                margin-right: 0.3rem;
+                font-size: 0.6rem;
+            }
+        </style>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    </head>
+
+    <body>
+        <h2>Compact Upgrade CTA Test</h2>
+
+        <h3>Commission Client → Flat-Rate Enterprise</h3>
+        <div class="test-container">
+            <div class="upgrade-cta">
+                <div class="upgrade-header">
+                    <i class="bi bi-star-fill"></i>
+                    <span>Upgrade Available</span>
+                </div>
+                <div class="upgrade-text">
+                    Switch to flat-rate pricing and unlock all enterprise features
+                </div>
+                <a href="#" class="btn-upgrade">
+                    <i class="bi bi-arrow-up"></i>
+                    Upgrade to Flat-Rate Enterprise
+                </a>
+            </div>
+        </div>
+
+        <h3>Basic Flat Rate → Premium</h3>
+        <div class="test-container">
+            <div class="upgrade-cta">
+                <div class="upgrade-header">
+                    <i class="bi bi-star-fill"></i>
+                    <span>Upgrade Available</span>
+                </div>
+                <div class="upgrade-text">
+                    Unlock advanced analytics and priority support
+                </div>
+                <a href="#" class="btn-upgrade">
+                    <i class="bi bi-arrow-up"></i>
+                    Upgrade to Premium Flat Rate
+                </a>
+            </div>
+        </div>
+
+        <h3>Premium → Professional</h3>
+        <div class="test-container">
+            <div class="upgrade-cta">
+                <div class="upgrade-header">
+                    <i class="bi bi-star-fill"></i>
+                    <span>Upgrade Available</span>
+                </div>
+                <div class="upgrade-text">
+                    Get real-time dashboard and all enterprise features
+                </div>
+                <a href="#" class="btn-upgrade">
+                    <i class="bi bi-arrow-up"></i>
+                    Upgrade to Professional Flat Rate
+                </a>
+            </div>
+        </div>
+    </body>
+
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <!-- Previous head content remains the same -->
+    <!-- ... -->
+    <body>
+        <!-- Previous header content remains the same -->
+        <!-- ... -->
+
+        <div class="container">
+            <div class="pricing-toggle">
+                <button class="toggle-btn active" data-plan-type="flatrate">Flat-Rate Plans</button>
+                <button class="toggle-btn" data-plan-type="commission">Commission-Based</button>
+            </div>
+
+            <!-- Flat-Rate Plans -->
+            <div id="flatrate-plans" class="plan-type active">
+                <div class="row">
+                    {% for slug, pkg in packages_flatrate.items() %}
+                    <div class="col-md-4">
+                        <div class="pricing-card {% if pkg.is_popular %}popular{% endif %}">
+                            {% if pkg.is_popular %}
+                            <div class="popular-badge">Popular</div>
+                            {% endif %}
+                            <h3 class="plan-name">{{ pkg.name }}</h3>
+                            <p class="plan-description">{{ pkg.description }}</p>
+                            <div class="plan-price">
+                                ${{ "%0.2f"|format(pkg.monthly_price) }} <span class="period">/month</span>
+                            </div>
+                            <ul class="plan-features">
+                                {% for feature in pkg.features %}
+                                <li><i class="fas fa-check"></i> {{ feature }}</li>
+                                {% endfor %}
+                            </ul>
+                            <a href="{{ url_for('auth.register', package_id=pkg.id) }}"
+                                class="btn btn-primary btn-get-started">
+                                Get Started
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Commission Plans -->
+            <div id="commission-plans" class="plan-type">
+                <div class="row">
+                    {% for slug, pkg in packages_commission.items() %}
+                    <div class="col-md-4">
+                        <div class="pricing-card {% if pkg.is_popular %}popular{% endif %}">
+                            {% if pkg.is_popular %}
+                            <div class="popular-badge">Popular</div>
+                            {% endif %}
+                            <h3 class="plan-name">{{ pkg.name }}</h3>
+                            <p class="plan-description">{{ pkg.description }}</p>
+                            <div class="plan-price">
+                                {{ pkg.commission_rate }}% <span class="period">+ $0.30 per transaction</span>
+                            </div>
+                            <ul class="plan-features">
+                                {% for feature in pkg.features %}
+                                <li><i class="fas fa-check"></i> {{ feature }}</li>
+                                {% endfor %}
+                            </ul>
+                            <a href="{{ url_for('auth.register', package_key=pkg.key) }}"
+                                class="btn btn-primary btn-get-started">
+                                Get Started
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Rest of the file remains the same -->
+        <!-- ... -->
+    </body>
+</html>

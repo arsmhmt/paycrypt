@@ -1,0 +1,1647 @@
+{% extends "public_base.html" %}
+
+{% block title %}Paycrypt - Professional Crypto Payment Gateway{% endblock %}
+
+{% block styles %}
+<style>
+    :root {
+        --primary: #6366f1;
+        --primary-dark: #4f46e5;
+        --primary-light: #8b5cf6;
+        --secondary: #10b981;
+        --warning: #f59e0b;
+        --dark: #1f2937;
+        --light: #f8fafc;
+        --gray: #64748b;
+        --gray-light: #e2e8f0;
+    }
+
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        color: var(--dark);
+        line-height: 1.6;
+        overflow-x: hidden;
+    }
+
+    /* Navigation */
+    .navbar {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        position: fixed;
+        width: 100%;
+        top: 0;
+        z-index: 1000;
+        padding: 1rem 0;
+    }
+
+    .navbar-brand {
+        font-weight: 700;
+        font-size: 1.5rem;
+        color: var(--primary) !important;
+        display: flex;
+        align-items: center;
+    }
+
+    .navbar-brand img {
+        height: 40px;
+        margin-right: 10px;
+    }
+
+    .nav-link {
+        color: #333333 !important;
+        font-weight: 500;
+        margin: 0 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .nav-link:hover {
+        color: var(--primary) !important;
+        transform: translateY(-2px);
+    }
+
+    /* Hero Section */
+    .hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 8rem 0 6rem;
+        position: relative;
+        overflow: hidden;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        margin-top: 80px;
+    }
+
+    @keyframes float {
+
+        0%,
+        100% {
+            transform: translateY(0px) rotate(0deg);
+        }
+
+        50% {
+            transform: translateY(-20px) rotate(180deg);
+        }
+    }
+
+    .hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='rgba(255,255,255,0.1)' fill-opacity='0.5'%3E%3Ccircle cx='7' cy='7' r='7'/%3E%3Ccircle cx='53' cy='7' r='7'/%3E%3Ccircle cx='7' cy='53' r='7'/%3E%3Ccircle cx='53' cy='53' r='7'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        animation: float 18s ease-in-out infinite;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .hero-title {
+        font-size: 4rem;
+        font-weight: 800;
+        margin-bottom: 2rem;
+        background: linear-gradient(135deg, #fff 0%, #e2e8f0 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        line-height: 1.1;
+    }
+
+    .hero-subtitle {
+        font-size: 1.5rem;
+        margin-bottom: 3rem;
+        opacity: 0.9;
+        font-weight: 400;
+    }
+
+    .hero-features {
+        display: flex;
+        gap: 2rem;
+        margin-bottom: 3rem;
+        flex-wrap: wrap;
+    }
+
+    .hero-feature {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 500;
+    }
+
+    .hero-feature i {
+        color: var(--secondary);
+    }
+
+    .hero-cta {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-hero-primary {
+        background: linear-gradient(135deg, #ff8c00, #f59e0b);
+        border: none;
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 50px;
+        color: white;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 25px rgba(245, 158, 11, 0.3);
+        text-decoration: none;
+    }
+
+    .btn-hero-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 15px 35px rgba(245, 158, 11, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-hero-secondary {
+        background: rgba(255, 255, 255, 0.1);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 50px;
+        color: white;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+
+    .btn-hero-secondary:hover {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.5);
+        color: white;
+        transform: translateY(-2px);
+        text-decoration: none;
+    }
+
+    /* Sections */
+    .section {
+        padding: 5rem 0;
+    }
+
+    .section-title {
+        font-size: 3rem;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 1rem;
+        color: var(--dark);
+    }
+
+    .section-subtitle {
+        font-size: 1.2rem;
+        color: var(--gray);
+        margin-bottom: 3rem;
+        max-width: 700px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .highlight-text {
+        color: var(--primary);
+        font-weight: 600;
+        position: relative;
+        display: inline-block;
+    }
+
+    .highlight-text::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: var(--primary-light);
+        opacity: 0.6;
+    }
+
+    /* Features Grid */
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(2, 1fr);
+        gap: 2rem;
+    }
+
+    @media (max-width: 992px) {
+        .features-grid {
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+        }
+    }
+
+    @media (max-width: 576px) {
+        .features-grid {
+            grid-template-columns: 1fr;
+            grid-template-rows: repeat(6, 1fr);
+        }
+    }
+
+    .feature-card {
+        background: white;
+        padding: 2.5rem 2rem;
+        border-radius: 20px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        border: 1px solid var(--gray-light);
+        text-align: center;
+        height: 100%;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        border-color: var(--primary);
+    }
+
+    .feature-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 1.5rem;
+        background: linear-gradient(135deg, #ff8c00, #f59e0b);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: white;
+    }
+
+    .feature-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: var(--dark);
+    }
+
+    .feature-description {
+        color: var(--gray);
+        line-height: 1.6;
+    }
+
+    /* Package Section */
+    .package-section {
+        background: linear-gradient(to bottom, #f8fafc 0%, #f1f5f9 100%);
+        padding: 7rem 0 6rem;
+        position: relative;
+    }
+
+    .package-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 30px;
+        width: 100%;
+        margin: 0 auto;
+        max-width: 1400px;
+        padding: 0 20px;
+    }
+
+    @media (max-width: 1200px) {
+        .package-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            max-width: 900px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .package-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+            max-width: 500px;
+        }
+    }
+
+    .package-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        background: linear-gradient(135deg, #ff8c00, #f59e0b);
+    }
+
+    .package-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2.5rem 2rem;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+        overflow: hidden;
+        height: 100%;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 600px;
+    }
+
+    .package-card:hover {
+        transform: translateY(-12px);
+        box-shadow: 0 25px 45px rgba(0, 0, 0, 0.1);
+        border-color: rgba(255, 140, 0, 0.3);
+    }
+
+    .package-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        background: linear-gradient(135deg, #ff8c00, #f59e0b);
+        z-index: 2;
+    }
+
+    .package-card::after {
+        content: '';
+        position: absolute;
+        top: -100px;
+        right: -100px;
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(circle, rgba(255, 140, 0, 0.05) 0%, rgba(255, 255, 255, 0) 70%);
+        border-radius: 50%;
+        z-index: -1;
+    }
+
+    .popular-badge {
+        position: absolute;
+        top: 20px;
+        right: -35px;
+        background: linear-gradient(135deg, #ff8c00, #f59e0b);
+        color: white;
+        padding: 8px 40px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        z-index: 10;
+        transform: rotate(45deg);
+        letter-spacing: 0.5px;
+    }
+
+    .package-type {
+        display: inline-block;
+        padding: 7px 18px;
+        border-radius: 30px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(135deg, #ff8c00, #f59e0b);
+        color: white;
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+        letter-spacing: 0.5px;
+    }
+
+    .package-name {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: var(--dark);
+        background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .package-description {
+        color: #64748b;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+        font-size: 1rem;
+        flex-grow: 0;
+    }
+
+    .package-features {
+        list-style: none;
+        padding: 0;
+        margin: 1.5rem 0;
+        text-align: left;
+        flex-grow: 1;
+    }
+
+    .package-feature {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 0.5rem 0;
+        color: #374151;
+        font-size: 0.95rem;
+        position: relative;
+    }
+
+    .package-feature i {
+        color: #f59e0b;
+        font-size: 1.2rem;
+        margin-top: 2px;
+        flex-shrink: 0;
+    }
+
+    .package-feature span {
+        line-height: 1.5;
+    }
+
+    .package-cta {
+        width: 100%;
+        padding: 1.25rem 2rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: all 0.4s ease;
+        border: none;
+        background: linear-gradient(135deg, #ff8c00, #f59e0b);
+        color: white;
+        box-shadow: 0 10px 25px rgba(245, 158, 11, 0.25);
+        text-decoration: none;
+        display: inline-block;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .package-cta::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0) 100%);
+        transition: all 0.6s ease;
+    }
+
+    .package-cta:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 35px rgba(245, 158, 11, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+
+    .package-cta:hover::before {
+        left: 100%;
+    }
+
+    /* Package Pricing */
+    .package-price {
+        text-align: center;
+        margin: 2rem 0;
+        padding: 1.5rem 0;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .price-main {
+        display: block;
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #f59e0b, #ff8c00);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        line-height: 1;
+        letter-spacing: -1px;
+    }
+
+    .price-sub {
+        display: block;
+        font-size: 1rem;
+        color: #64748b;
+        margin-top: 0.75rem;
+        letter-spacing: 0.3px;
+    }
+
+    .annual-discount {
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+
+    /* Package CTA Button */
+    .package-cta {
+        width: 100%;
+        padding: 1rem 1.5rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.4s ease;
+        border: none;
+        background: linear-gradient(135deg, #ff8c00, #f59e0b);
+        color: white;
+        box-shadow: 0 8px 20px rgba(245, 158, 11, 0.25);
+        text-decoration: none;
+        display: inline-block;
+        position: relative;
+        overflow: hidden;
+        margin-top: auto;
+    }
+
+    .package-cta:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 25px rgba(245, 158, 11, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+
+    .popular-badge-small {
+        position: absolute;
+        top: 20px;
+        right: -30px;
+        background: linear-gradient(135deg, #ff8c00, #f59e0b);
+        color: white;
+        padding: 5px 30px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+        z-index: 10;
+        transform: rotate(45deg);
+    }
+
+    .package-card-compact:hover .popular-badge-small {
+        box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5);
+    }
+
+    /* Plan Type Info */
+    .plan-type-row {
+        display: flex;
+        flex-wrap: wrap;
+        margin-top: 1rem;
+    }
+
+    .plan-type-row>div {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .plan-type-info {
+        padding: 2.5rem;
+        background: white;
+        border-radius: 24px;
+        transition: all 0.4s ease;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .plan-type-info::after {
+        content: '';
+        position: absolute;
+        top: -50px;
+        right: -50px;
+        width: 100px;
+        height: 100px;
+        background: radial-gradient(circle, rgba(255, 140, 0, 0.05) 0%, rgba(255, 255, 255, 0) 70%);
+        border-radius: 50%;
+        z-index: 0;
+    }
+
+    .plan-type-info:hover {
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+        transform: translateY(-8px);
+        border-color: rgba(245, 158, 11, 0.3);
+    }
+
+    .plan-type-icon {
+        width: 90px;
+        height: 90px;
+        margin: 0 auto 2rem;
+        background: linear-gradient(135deg, #ff8c00, #f59e0b);
+        border-radius: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 10px 25px rgba(245, 158, 11, 0.2);
+        position: relative;
+        z-index: 2;
+    }
+
+    .plan-type-icon i {
+        font-size: 2.5rem;
+        color: white;
+    }
+
+    .plan-type-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        color: #1f2937;
+        position: relative;
+        z-index: 2;
+    }
+
+    .plan-type-content {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        z-index: 2;
+    }
+
+    .plan-type-highlight {
+        margin-top: 0.8rem;
+        color: #374151;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        font-size: 1rem;
+        font-weight: 500;
+        position: relative;
+    }
+
+    .plan-type-highlight i {
+        color: #f59e0b;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+        margin-top: 3px;
+    }
+
+    @media (max-width: 768px) {
+        .plan-type-info {
+            margin-bottom: 2rem;
+            padding: 2rem;
+        }
+
+        .plan-type-icon {
+            width: 75px;
+            height: 75px;
+            margin-bottom: 1.5rem;
+        }
+
+        .plan-type-icon i {
+            font-size: 2rem;
+        }
+    }
+
+    /* Payment Info */
+    .payment-info-card {
+        background: white;
+        border-radius: 24px;
+        padding: 3rem;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(255, 140, 0, 0.2);
+        margin-top: 4rem;
+        position: relative;
+        overflow: hidden;
+        background-image: radial-gradient(circle at top right, rgba(255, 140, 0, 0.03) 0%, rgba(255, 255, 255, 0) 60%),
+            radial-gradient(circle at bottom left, rgba(255, 140, 0, 0.03) 0%, rgba(255, 255, 255, 0) 60%);
+    }
+
+    .payment-info-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(135deg, #ff8c00, #f59e0b);
+        z-index: 0;
+    }
+
+    .payment-info-card>* {
+        position: relative;
+        z-index: 1;
+    }
+
+    .payment-info-card h5 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 2rem;
+        color: #1f2937;
+    }
+
+    .payment-info-card h5 i {
+        color: #f59e0b;
+    }
+
+    .crypto-icons {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 3rem;
+        flex-wrap: wrap;
+        margin: 2rem 0;
+    }
+
+    .crypto-icon {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        transition: all 0.4s ease;
+    }
+
+    .crypto-svg {
+        width: 50px;
+        height: 50px;
+        margin-bottom: 0.75rem;
+        filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.05));
+    }
+
+    .crypto-icon span {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #64748b;
+    }
+
+    .crypto-icon:hover {
+        transform: translateY(-8px);
+    }
+
+    .crypto-more {
+        background: #f1f5f9;
+        color: #64748b;
+        padding: 0.6rem 1.2rem;
+        border-radius: 30px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .crypto-more:hover {
+        background: #e2e8f0;
+        color: #475569;
+    }
+
+    .payment-info-divider {
+        height: 1px;
+        background: linear-gradient(to right, transparent, rgba(255, 140, 0, 0.2), transparent);
+        margin: 1.5rem auto;
+        width: 70%;
+        opacity: 0.6;
+    }
+
+    @media (max-width: 768px) {
+        .crypto-icons {
+            gap: 2rem;
+        }
+
+        .payment-info-card {
+            padding: 2.5rem;
+        }
+    }
+
+    /* Stats Section */
+    .stats-section {
+        background: var(--dark);
+        color: white;
+        padding: 4rem 0;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 2rem;
+        text-align: center;
+    }
+
+    .stat-item {
+        padding: 1rem;
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: var(--secondary);
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+
+    /* CTA Section */
+    .cta-section {
+        background: linear-gradient(135deg, #ff8c00, #f59e0b);
+        color: white;
+        padding: 5rem 0;
+        text-align: center;
+    }
+
+    .cta-title {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .cta-subtitle {
+        font-size: 1.25rem;
+        margin-bottom: 3rem;
+        opacity: 0.9;
+    }
+
+    /* Footer */
+    .footer {
+        background: #fafafa;
+        /* Lighter background */
+        color: #333;
+        padding: 2.5rem 0 1rem;
+    }
+
+    .footer-logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.2rem;
+    }
+
+    .footer-logo img {
+        height: 40px;
+        margin-right: 10px;
+    }
+
+    .contact-links {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 2rem;
+        margin-top: 1.2rem;
+    }
+
+    .contact-link {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #444;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+
+    .contact-link:hover {
+        color: #ff8c00;
+        transform: translateY(-2px);
+    }
+
+    .contact-link i {
+        font-size: 1.3rem;
+    }
+
+    .copyright {
+        margin-top: 1.8rem;
+        padding-top: 1.2rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.04);
+        text-align: center;
+        color: #888;
+        font-size: 0.9rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .hero {
+            padding: 6rem 0 4rem;
+            text-align: center;
+            margin-top: 70px;
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+        }
+
+        .section-title {
+            font-size: 2.25rem;
+        }
+
+        .cta-title {
+            font-size: 2.25rem;
+        }
+
+        .hero-features {
+            justify-content: center;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .package-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .package-card {
+            margin-bottom: 1.5rem;
+            max-width: 100%;
+            padding: 2rem 1.5rem;
+            min-height: 500px;
+        }
+
+        .crypto-icons {
+            gap: 1.5rem;
+        }
+
+        .crypto-svg {
+            width: 40px;
+            height: 40px;
+        }
+
+        .payment-info-card {
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .hero-title {
+            font-size: 2rem;
+        }
+
+        .package-grid {
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        .package-card {
+            padding: 1.5rem 1.25rem;
+            min-height: 450px;
+        }
+
+        .payment-info-card {
+            padding: 1.5rem;
+        }
+
+        .crypto-icons {
+            gap: 0.75rem;
+        }
+
+        .crypto-svg {
+            width: 30px;
+            height: 30px;
+        }
+
+        .package-section {
+            padding: 4rem 0;
+        }
+
+        .section-title {
+            font-size: 1.75rem;
+        }
+
+        .plan-type-icon {
+            width: 60px;
+            height: 60px;
+        }
+
+        .plan-type-icon i {
+            font-size: 1.5rem;
+        }
+
+        .plan-type-info {
+            padding: 1.5rem;
+        }
+
+        .popular-badge,
+        .popular-badge-small {
+            padding: 6px 16px;
+            font-size: 0.75rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand" href="{{ url_for('main.landing') }}">
+            <img src="{{ url_for('static', filename='img/paycrypt_logo.png') }}" alt="Paycrypt">
+
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item">
+                    <a class="nav-link" href="#features">Features</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#package">Package</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#stats">About</a>
+                </li>
+                <li class="nav-item me-3">
+                    <a href="/auth/login" class="nav-link">Sign In</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#package" class="btn btn-primary btn-sm px-3">
+                        Get Started
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <div class="hero-content">
+                    <h1 class="hero-title">
+                        Accept Crypto Payments<br>
+                        <span style="color: #10b981;">Like a Pro</span>
+                    </h1>
+                    <p class="hero-subtitle">
+                        The most advanced cryptocurrency payment gateway for businesses. Accept Bitcoin, Ethereum, and
+                        150+ cryptocurrencies with enterprise-grade security.
+                    </p>
+
+                    <div class="hero-features">
+                        <div class="hero-feature">
+                            <i class="bi bi-shield-check"></i>
+                            <span>Bank-Grade Security</span>
+                        </div>
+                        <div class="hero-feature">
+                            <i class="bi bi-lightning-charge"></i>
+                            <span>Instant Settlements</span>
+                        </div>
+                        <div class="hero-feature">
+                            <i class="bi bi-currency-bitcoin"></i>
+                            <span>150+ Cryptocurrencies</span>
+                        </div>
+                    </div>
+
+                    <div class="hero-cta">
+                        <a href="#package" class="btn-hero-primary">
+                            <i class="bi bi-rocket me-2"></i>Get Started Today
+                        </a>
+                        <a href="#features" class="btn-hero-secondary">
+                            <i class="bi bi-eye me-2"></i>Learn More
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="text-center">
+                    <img src="{{ url_for('static', filename='img/paycrypt_logo.png') }}" alt="Crypto Payment Gateway"
+                        class="img-fluid" style="max-height: 100px;">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="section">
+    <div class="container">
+        <h2 class="section-title">Why Choose Paycrypt?</h2>
+        <p class="section-subtitle">
+            Built for businesses of all sizes with enterprise-grade features and professional support
+        </p>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="bi bi-shield-lock"></i>
+                </div>
+                <h3 class="feature-title">Enterprise Security</h3>
+                <p class="feature-description">
+                    Multi-signature wallets, cold storage, and bank-grade security. SOC 2 Type II compliant with 256-bit
+                    encryption.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="bi bi-currency-bitcoin"></i>
+                </div>
+                <h3 class="feature-title">150+ Cryptocurrencies</h3>
+                <p class="feature-description">
+                    Accept Bitcoin, Ethereum, Litecoin, and 150+ cryptocurrencies with automatic conversion to your
+                    preferred currency.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="bi bi-graph-up-arrow"></i>
+                </div>
+                <h3 class="feature-title">Advanced Analytics</h3>
+                <p class="feature-description">
+                    Real-time dashboards, transaction analytics, and business intelligence tools to optimize your crypto
+                    operations.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="bi bi-code-square"></i>
+                </div>
+                <h3 class="feature-title">Developer-Friendly API</h3>
+                <p class="feature-description">
+                    RESTful APIs, webhooks, SDKs for popular languages, and comprehensive documentation for seamless
+                    integration.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="bi bi-lightning-charge"></i>
+                </div>
+                <h3 class="feature-title">Instant Settlements</h3>
+                <p class="feature-description">
+                    Lightning-fast processing with real-time confirmations and automated settlements to your preferred
+                    wallet.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="bi bi-headset"></i>
+                </div>
+                <h3 class="feature-title">24/7 Expert Support</h3>
+                <p class="feature-description">
+                    Round-the-clock support with dedicated account managers and priority ticket resolution for all
+                    clients.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Package Section -->
+<section id="package" class="package-section">
+    <div class="container">
+        <h2 class="section-title">Choose Your Perfect Plan</h2>
+        <p class="section-subtitle mb-5">
+            <span class="highlight-text">Two flexible payment models</span> designed for different business needs
+        </p>
+
+        <!-- Plan Types Explanation -->
+        <div class="row mb-5">
+            <div class="col-lg-10 mx-auto">
+                <div class="row text-center plan-type-row">
+                    <div class="col-md-6 mb-4">
+                        <div class="plan-type-info">
+                            <div class="plan-type-icon">
+                                <i class="bi bi-percent"></i>
+                            </div>
+                            <h5 class="plan-type-title">Commission-Based Model</h5>
+                            <div class="plan-type-content">
+                                <p class="text-muted">
+                                    Enterprise-grade solution with transaction-based pricing. Pay only for what you
+                                    process, with custom commission rates tailored to your business volume.
+                                </p>
+                                <p class="plan-type-highlight">
+                                    <i class="bi bi-check-circle-fill"></i> <span>Ideal for high-volume merchants</span>
+                                </p>
+                                <p class="plan-type-highlight">
+                                    <i class="bi bi-check-circle-fill"></i> <span>Customized rates based on transaction
+                                        volume</span>
+                                </p>
+                                <p class="plan-type-highlight">
+                                    <i class="bi bi-check-circle-fill"></i> <span>Pay only when transactions are
+                                        processed</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="plan-type-info">
+                            <div class="plan-type-icon">
+                                <i class="bi bi-calendar3"></i>
+                            </div>
+                            <h5 class="plan-type-title">Flat-Rate Subscription</h5>
+                            <div class="plan-type-content">
+                                <p class="text-muted">
+                                    Predictable monthly or annual subscription with transparent pricing. Choose from
+                                    three tiers with clearly defined feature sets.
+                                </p>
+                                <p class="plan-type-highlight">
+                                    <i class="bi bi-check-circle-fill"></i> <span>Predictable operational
+                                        expenses</span>
+                                </p>
+                                <p class="plan-type-highlight">
+                                    <i class="bi bi-check-circle-fill"></i> <span>Scalable packages as your business
+                                        grows</span>
+                                </p>
+                                <p class="plan-type-highlight">
+                                    <i class="bi bi-check-circle-fill"></i> <span>No additional transaction fees</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="package-grid">
+            <!-- Commission-Based Plan -->
+            <div class="package-card">
+                <div class="popular-badge">Most Flexible</div>
+                <div class="package-type">Commission-Based</div>
+
+                <h3 class="package-name">Professional</h3>
+                <div class="package-price">
+                    <span class="price-main">Contact Us</span>
+                    <span class="price-sub">for custom pricing</span>
+                </div>
+
+                <p class="package-description">
+                    Pay only when you earn. Custom setup fees and commission rates negotiated based on your business
+                    volume and requirements. Perfect for high-volume businesses.
+                </p>
+
+                <ul class="package-features">
+                    <li class="package-feature">
+                        <i class="bi bi-check-circle"></i>
+                        <span>Custom Commission Rates</span>
+                    </li>
+                    <li class="package-feature">
+                        <i class="bi bi-check-circle"></i>
+                        <span>25+ Cryptocurrencies</span>
+                    </li>
+                    <li class="package-feature">
+                        <i class="bi bi-check-circle"></i>
+                        <span>Unlimited Transactions</span>
+                    </li>
+                    <li class="package-feature">
+                        <i class="bi bi-check-circle"></i>
+                        <span>Advanced Dashboard & Analytics</span>
+                    </li>
+                    <li class="package-feature">
+                        <i class="bi bi-check-circle"></i>
+                        <span>Custom Wallet Integration</span>
+                    </li>
+                    <li class="package-feature">
+                        <i class="bi bi-check-circle"></i>
+                        <span>Full API Access & Webhooks</span>
+                    </li>
+                    <li class="package-feature">
+                        <i class="bi bi-check-circle"></i>
+                        <span>24/7 Priority Support</span>
+                    </li>
+                </ul>
+
+                <a href="{{ url_for('auth.register') }}?package=professional" class="package-cta">
+                    <i class="bi bi-rocket me-2"></i>Get Started
+                </a>
+
+                <div class="mt-3">
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Flexible setup fees and commission rates negotiated per client
+                    </small>
+                </div>
+            </div>
+
+            <!-- Starter Plan -->
+            <div class="package-card">
+                <div class="package-type">Flat-Rate</div>
+
+                <h3 class="package-name">Starter</h3>
+                <div class="package-price">
+                    <span class="price-main">{{ starter_price_monthly }}</span>
+                    <span class="price-sub">per month</span>
+                </div>
+                <div class="annual-discount">
+                    <small class="text-success">
+                        <i class="bi bi-calendar-check me-1"></i>
+                        {{ starter_price_annual }}/year (Save 10%)
+                    </small>
+                </div>
+
+                <ul class="package-features">
+                    <li class="package-feature">
+                        <i class="bi bi-check-circle"></i>
+                        <span>Up to 30,000$ transactions</span>
+                    </li>
+                    <li class="package-feature">
+                        <i class="bi bi-check-circle"></i>
+                        <span>15+ Cryptocurrencies</span>
+                    </li>
+                    <li class="package-feature">
+                        <i class="bi bi-check-circle"></i>
+                        <span>Basic Dashboard</span>
+                    </li>
+                    <li class="package-feature">
+                        <i class="bi bi-check-circle"></i>
+                        <span>API Access</span>
+                    </li>
+                    <li class="package-feature">
+                        <i class="bi bi-check-circle"></i>
+                        <span>Email Support</span>
+                    </li>
+                </ul>
+
+                <a href="{{ url_for('auth.register') }}?package=starter" class="package-cta">
+                    <i class="bi bi-play me-2"></i>Start Now
+                </a>
+
+                <div class="mt-2">
+                    <small class="text-muted">
+                        <i class="bi bi-arrow-repeat me-1"></i>
+                        Monthly or annual billing. Service suspended if expired.
+                    </small>
+                </div>
+            </div>
+
+            <!-- Business Plan -->
+            <div class="package-card">
+                <div class="popular-badge-small">Popular</div>
+                <div class="package-type">Flat-Rate</div>
+
+                <h3 class="package-name">Business</h3>
+                <div class="package-price">
+                    <span class="price-main">{{ business_price_monthly }}</span>
+                    <span class="price-sub">per month</span>
+                </div>
+                <div class="annual-discount">
+                    <small class="text-success">
+                        <i class="bi bi-calendar-check me-1"></i>
+                        {{ business_price_annual }}/year (Save 10%)
+                    </small>
+                </div>
+
+                <ul class="package-features">
+                    <li class="package-feature">
+                        <i class="bi bi-check-circle"></i>
+                        <span>Up to 70,000$ transactions</span>
+                    </li>
+                    <li class="package-feature">
+                        <i class="bi bi-check-circle"></i>
+                        <span>20+ Cryptocurrencies</span>
+                    </li>
+                    <li class="package-feature">
+                        <i class="bi bi-check-circle"></i>
+                        <span>Advanced Dashboard</span>
+                    </li>
+                    <li class="package-feature">
+                        <i class="bi bi-check-circle"></i>
+                        <span>Full API & Webhooks</span>
+                    </li>
+                    <li class="package-feature">
+                        <i class="bi bi-check-circle"></i>
+                        <span>Priority Support</span>
+                    </li>
+                </ul>
+
+                <a href="{{ url_for('auth.register') }}?package=business" class="package-cta">
+                    <i class="bi bi-briefcase me-2"></i>Choose Business
+                </a>
+
+                <div class="mt-2">
+                    <small class="text-muted">
+                        <i class="bi bi-arrow-repeat me-1"></i>
+                        Monthly or annual billing. Service suspended if expired.
+                    </small>
+                </div>
+            </div>
+
+            <!-- Enterprise Plan -->
+            <div class="package-card">
+                <div class="package-type">Flat-Rate</div>
+
+                <h3 class="package-name">Enterprise</h3>
+                <div class="package-price">
+                    <span class="price-main">{{ enterprise_price_monthly }}</span>
+                    <span class="price-sub">per month</span>
+                </div>
+                <div class="annual-discount">
+                    <small class="text-success">
+                        <i class="bi bi-calendar-check me-1"></i>
+                        {{ enterprise_price_annual }}/year (Save 10%)
+                    </small>
+                </div>
+
+                <ul class="package-features">
+                    <li class="package-feature">
+                        <i class="bi bi-check-circle"></i>
+                        <span>Unlimited transactions</span>
+                    </li>
+                    <li class="package-feature">
+                        <i class="bi bi-check-circle"></i>
+                        <span>25+ Cryptocurrencies</span>
+                    </li>
+                    <li class="package-feature">
+                        <i class="bi bi-check-circle"></i>
+                        <span>Custom Dashboard</span>
+                    </li>
+                    <li class="package-feature">
+                        <i class="bi bi-check-circle"></i>
+                        <span>Full API & Webhooks</span>
+                    </li>
+                    <li class="package-feature">
+                        <i class="bi bi-check-circle"></i>
+                        <span>24/7 Phone Support</span>
+                    </li>
+                    <li class="package-feature">
+                        <i class="bi bi-check-circle"></i>
+                        <span>White-label Options</span>
+                    </li>
+                </ul>
+
+                <a href="{{ url_for('auth.register') }}?package=enterprise" class="package-cta">
+                    <i class="bi bi-building me-2"></i>Go Enterprise
+                </a>
+
+                <div class="mt-2">
+                    <small class="text-muted">
+                        <i class="bi bi-arrow-repeat me-1"></i>
+                        Monthly or annual billing. Service suspended if expired.
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Methods Info -->
+        <div class="mt-5">
+            <div class="payment-info-card">
+                <h5 class="text-center">
+                    <i class="bi bi-wallet2 me-2"></i>
+                    Cryptocurrency Payments Accepted
+                </h5>
+
+                <div class="crypto-icons">
+                    <div class="crypto-icon">
+                        <svg class="crypto-svg bitcoin" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M16 32C7.163 32 0 24.837 0 16S7.163 0 16 0s16 7.163 16 16-7.163 16-16 16zm7.189-17.98c.314-2.096-1.283-3.223-3.465-3.975l.708-2.84-1.728-.43-.69 2.765c-.454-.114-.92-.22-1.385-.326l.695-2.783L15.596 6l-.708 2.839c-.376-.086-.746-.17-1.104-.26l.002-.009-2.384-.595-.46 1.846s1.283.294 1.256.312c.7.175.826.638.805 1.006l-.806 3.235c.048.012.11.03.18.057l-.183-.045-1.13 4.532c-.086.212-.303.531-.793.41.018.025-1.256-.313-1.256-.313l-.858 1.978 2.25.561c.418.105.828.215 1.231.318l-.715 2.872 1.727.43.708-2.84c.472.127.93.245 1.378.357l-.706 2.828 1.728.43.715-2.866c2.948.558 5.164.333 6.097-2.333.752-2.146-.037-3.385-1.588-4.192 1.13-.26 1.98-1.003 2.207-2.538zm-3.95 5.538c-.533 2.147-4.148.986-5.32.695l.95-3.805c1.172.293 4.929.872 4.37 3.11zm.535-5.569c-.487 1.953-3.495.96-4.47.717l.86-3.45c.975.243 4.118.696 3.61 2.733z"
+                                fill="#f7931a" />
+                        </svg>
+                        <span>Bitcoin</span>
+                    </div>
+                    <div class="crypto-icon">
+                        <svg class="crypto-svg ethereum" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                            <g fill-rule="evenodd">
+                                <path
+                                    d="M16 32C7.163 32 0 24.837 0 16S7.163 0 16 0s16 7.163 16 16-7.163 16-16 16zm7.994-15.781L16.498 4 9 16.22l7.498 4.353 7.496-4.354zM24 17.616l-7.502 4.351L9 17.617l7.498 10.378L24 17.616z"
+                                    fill="#627eea" />
+                                <g fill="#fff">
+                                    <path fill-opacity=".5" d="M16.498 4v8.87l7.497 3.35z" />
+                                    <path d="M16.498 4L9 16.22l7.498-3.35z" />
+                                    <path fill-opacity=".5" d="M16.498 21.968v6.027L24 17.616z" />
+                                    <path d="M16.498 27.995v-6.028L9 17.616z" />
+                                    <path fill-opacity=".2" d="M16.498 20.573l7.497-4.353-7.497-3.348z" />
+                                    <path fill-opacity=".6" d="M9 16.22l7.498 4.353v-7.701z" />
+                                </g>
+                            </g>
+                        </svg>
+                        <span>Ethereum</span>
+                    </div>
+                    <div class="crypto-icon">
+                        <svg class="crypto-svg tether" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M16 32C7.163 32 0 24.837 0 16S7.163 0 16 0s16 7.163 16 16-7.163 16-16 16zm.5-30.5c-8.563 0-15.5 6.937-15.5 15.5s6.937 15.5 15.5 15.5S31.5 25.563 31.5 16 25.063 1.5 16.5 1.5zm-.144 5.998c-4.548 0-7.91 1.34-8.323 1.512l1.378 4.164h.003c.7-.287 3.607-1.292 7.017-1.292 3.384 0 6.209.994 6.955 1.292h.003l1.395-4.164c-.414-.172-3.776-1.512-8.323-1.512h-.105zm-.225 15.5v-4.164c-4.73.414-7.745-1.119-7.745-1.119v4.113s2.874 1.542 7.745 1.17zm0-5.246v-3.87h-.017c-5.1-.431-8.333-1.804-8.333-1.804v3.75s3.066 1.678 8.35 1.924zm0-4.906v-3.868c-5.541.422-8.35-1.924-8.35-1.924v3.75s3.233 1.373 8.333 1.804h.017zm16.482-1.924s-2.809 2.346-8.35 1.924v3.868h.017c5.1.431 8.333 1.804 8.333 1.804v-3.75zm-.017 4.906s-2.86 1.533-7.745 1.119v-4.164c4.871.371 7.745-1.17 7.745-1.17v-4.113zm-8.24-3.786v3.87c5.284-.246 8.35-1.924 8.35-1.924v-3.75s-3.233 1.373-8.333 1.804h-.017z"
+                                fill="#53ae94" />
+                        </svg>
+                        <span>USDT</span>
+                    </div>
+                    <div class="crypto-icon">
+                        <svg class="crypto-svg xrp" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M16 32C7.163 32 0 24.837 0 16S7.163 0 16 0s16 7.163 16 16-7.163 16-16 16zm7.07-24l-4.574 4.523a3.556 3.556 0 01-4.996 0L8.93 8H6.035l6.02 5.957a5.621 5.621 0 007.89 0L25.961 8h-2.89zm0 16l-4.574-4.523a3.556 3.556 0 00-4.996 0L8.93 24H6.035l6.02-5.957a5.621 5.621 0 017.89 0L25.961 24h-2.89z"
+                                fill="#23292f" />
+                        </svg>
+                        <span>XRP</span>
+                    </div>
+                    <div class="crypto-icon">
+                        <svg class="crypto-svg solana" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M16 0c8.837 0 16 7.163 16 16s-7.163 16-16 16S0 24.837 0 16 7.163 0 16 0z"
+                                fill="#9945FF" fill-rule="evenodd" />
+                            <path
+                                d="M9.448 10.134 14.223 6.3a.59.59 0 0 1 .417-.173h7.704c.164 0 .246.198.13.313l-4.725 3.783a.59.59 0 0 1-.417.173H9.578a.174.174 0 0 1-.131-.313l.001.05zm0 6.774 4.775-3.834a.59.59 0 0 1 .417-.173h7.704c.164 0 .246.198.13.313l-4.725 3.783a.59.59 0 0 1-.417.173H9.578a.174.174 0 0 1-.131-.313l.001.051zm0 6.724 4.775-3.834a.59.59 0 0 1 .417-.173h7.704c.164 0 .246.198.13.313l-4.725 3.783a.59.59 0 0 1-.417.173H9.578a.174.174 0 0 1-.131-.313l.001.051z"
+                                fill="#fff" />
+                        </svg>
+                        <span>Solana</span>
+                    </div>
+                    <div class="crypto-more">
+                        +145 more
+                    </div>
+                </div>
+
+                <div class="payment-info-divider"></div>
+
+                <p class="text-center mt-3 mb-0">
+                    <strong style="color: #ff8c00;">Native Crypto Payments</strong> with real-time conversion rates and
+                    instant settlements
+                </p>
+            </div>
+        </div>
+    </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section id="stats" class="stats-section">
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-number">$2.5B+</div>
+                <div class="stat-label">Transactions Processed</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">150+</div>
+                <div class="stat-label">Supported Cryptocurrencies</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">99.9%</div>
+                <div class="stat-label">Uptime Guarantee</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">24/7</div>
+                <div class="stat-label">Expert Support</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="container">
+        <h2 class="cta-title">Ready to Get Started?</h2>
+        <p class="cta-subtitle">
+            Join thousands of businesses already using Paycrypt for their crypto payment needs
+        </p>
+        <div class="d-flex gap-3 justify-content-center flex-wrap">
+            <a href="{{ url_for('auth.register') }}" class="btn-hero-primary">
+                <i class="bi bi-rocket me-2"></i>Start Today
+            </a>
+            <a href="/auth/login" class="btn-hero-secondary">
+                <i class="bi bi-person me-2"></i>Sign In
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="container">
+        <div class="text-center">
+            <div class="footer-logo">
+                <img src="{{ url_for('static', filename='img/paycrypt_logo.png') }}" alt="Paycrypt">
+            </div>
+            <div class="contact-links d-flex justify-content-center gap-4 my-3">
+                <a href="mailto:support@paycrypt.online" title="Email" target="_blank" rel="noopener">
+                    <i class="bi bi-envelope-fill" style="font-size: 1.3em;"></i>
+                </a>
+                <a href="mailto:support@paycrypt.online" title="Teams" target="_blank" rel="noopener">
+                    <i class="bi bi-microsoft-teams" style="font-size: 1.3em;"></i>
+                </a>
+                <a href="https://t.me/paycryptonline" title="Telegram" target="_blank" rel="noopener">
+                    <i class="bi bi-telegram" style="font-size: 1.3em;"></i>
+                </a>
+                <a href="https://paycrypt.online" title="Website" target="_blank" rel="noopener">
+                    <i class="bi bi-globe" style="font-size: 1.3em;"></i>
+                </a>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>&copy; 2025 Paycrypt. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+
+    // Add scroll effect to navbar
+    window.addEventListener('scroll', function () {
+        const navbar = document.querySelector('.navbar');
+        if (window.scrollY > 50) {
+            navbar.style.background = 'rgba(255, 255, 255, 0.98)';
+        } else {
+            navbar.style.background = 'rgba(255, 255, 255, 0.95)';
+        }
+    });
+</script>
+{% endblock %}

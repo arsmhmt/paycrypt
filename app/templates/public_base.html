@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Paycrypt - Professional Crypto Payment Gateway{% endblock %}</title>
+    
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Custom styles -->
+    {% block styles %}{% endblock %}
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Accept Bitcoin, Ethereum, and 150+ cryptocurrencies with Paycrypt's secure payment gateway. Enterprise-grade security, instant settlements, global coverage.">
+    <meta name="keywords" content="crypto payment gateway, bitcoin payments, ethereum payments, cryptocurrency processing, crypto merchant services">
+    <meta name="author" content="Paycrypt">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="Paycrypt - Professional Crypto Payment Gateway">
+    <meta property="og:description" content="Accept cryptocurrency payments with enterprise-grade security and flexible pricing models.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request.url }}">
+    <meta property="og:image" content="{{ url_for('static', filename='img/paycrypt_og.png', _external=True) }}">
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Paycrypt - Professional Crypto Payment Gateway">
+    <meta name="twitter:description" content="Accept cryptocurrency payments with enterprise-grade security and flexible pricing models.">
+    <meta name="twitter:image" content="{{ url_for('static', filename='img/paycrypt_og.png', _external=True) }}">
+</head>
+
+<body>
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="position-fixed top-0 end-0 p-3" style="z-index: 9999;">
+                {% for category, message in messages %}
+                    <div class="toast show align-items-center text-white bg-{{ 'danger' if category == 'error' else category }}" role="alert">
+                        <div class="d-flex">
+                            <div class="toast-body">{{ message }}</div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    {% block content %}{% endblock %}
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block scripts %}{% endblock %}
+    
+    <!-- Analytics (if needed) -->
+    {% block analytics %}{% endblock %}
+</body>
+</html>

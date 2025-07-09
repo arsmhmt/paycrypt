@@ -1,0 +1,304 @@
+# Turkish translations for PROJECT.
+# Copyright (C) 2025 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2025-07-02 00:09+0300\n"
+"PO-Revision-Date: 2025-07-01 23:53+0300\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: tr\n"
+"Language-Team: tr <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: app/templates/admin/dashboard.html:3 app/templates/admin/dashboard.html:10
+#: app/templates/client/base.html:8 app/templates/client/base.html:605
+msgid "Dashboard"
+msgstr "Kontrol Paneli"
+
+#: app/templates/client/base.html:8
+msgid "Client Dashboard"
+msgstr "Müşteri Paneli"
+
+#: app/templates/client/base.html:570
+msgid "Transactions"
+msgstr "İşlemler"
+
+#: app/templates/client/base.html:575
+msgid "Payments"
+msgstr "Ödemeler"
+
+#: app/templates/client/base.html:580
+msgid "Withdrawals"
+msgstr "Para Çekme"
+
+#: app/templates/client/base.html:590
+msgid "Business"
+msgstr "İş"
+
+#: app/templates/client/base.html:595
+msgid "Invoices"
+msgstr "Faturalar"
+
+#: app/templates/client/base.html:600
+msgid "Documents"
+msgstr "Belgeler"
+
+#: app/templates/client/base.html:610
+msgid "Developer"
+msgstr "Geliştirici"
+
+#: app/templates/client/base.html:615
+msgid "API Keys"
+msgstr "API Anahtarları"
+
+#: app/templates/client/base.html:620
+msgid "API Documentation"
+msgstr "API Dokümantasyonu"
+
+#: app/templates/client/base.html:625
+msgid "Webhooks"
+msgstr "Webhook'lar"
+
+#: app/templates/client/base.html:635
+msgid "Account"
+msgstr "Hesap"
+
+#: app/templates/client/base.html:640
+msgid "Profile"
+msgstr "Profil"
+
+#: app/templates/client/base.html:645
+msgid "Settings"
+msgstr "Ayarlar"
+
+#: app/templates/client/base.html:650
+msgid "Support"
+msgstr "Destek"
+
+#: app/templates/client/base.html:655
+msgid "Language"
+msgstr "Dil"
+
+#: app/templates/client/base.html:660
+msgid "Client Portal"
+msgstr "Müşteri Portalı"
+
+#: app/templates/client/base.html:665
+msgid "Search transactions, invoices..."
+msgstr "İşlem, fatura ara..."
+
+#: app/templates/client/base.html:670
+msgid "Quick Actions"
+msgstr "Hızlı İşlemler"
+
+#: app/templates/client/base.html:675
+msgid "New Payment"
+msgstr "Yeni Ödeme"
+
+#: app/templates/client/base.html:680
+msgid "New Withdrawal"
+msgstr "Yeni Para Çekme"
+
+#: app/templates/client/base.html:685
+msgid "Create Invoice"
+msgstr "Fatura Oluştur"
+
+#: app/templates/client/base.html:690
+msgid "Contact Support"
+msgstr "Destek İle İletişim"
+
+#: app/templates/client/base.html:695
+msgid "Recent Notifications"
+msgstr "Son Bildirimler"
+
+#: app/templates/client/base.html:700
+msgid "View All Notifications"
+msgstr "Tüm Bildirimleri Görüntüle"
+
+#: app/templates/admin/dashboard.html:11
+#, python-format
+msgid "Welcome back, %(username)s! Here's what's happening."
+msgstr "Hoş geldin, %(username)s! İşte neler oluyor."
+
+#: app/templates/admin/dashboard.html:43
+msgid "Export"
+msgstr "Dışa Aktar"
+
+#: app/templates/admin/dashboard.html:50
+msgid "Print"
+msgstr "Yazdır"
+
+#: app/templates/admin/dashboard.html:53
+msgid "New Payment"
+msgstr "Yeni Ödeme"
+
+#: app/templates/admin/dashboard.html:69
+msgid "Total Revenue"
+msgstr "Toplam Gelir"
+
+#: app/templates/admin/dashboard.html:72
+msgid "from last month"
+msgstr "geçen aydan itibaren"
+
+#: app/templates/admin/dashboard.html:450
+msgid "System Health"
+msgstr ""
+
+#: app/templates/admin/dashboard.html:452
+msgid "Online"
+msgstr ""
+
+#: app/templates/admin/dashboard.html:460
+msgid "API Service"
+msgstr ""
+
+#: app/templates/admin/dashboard.html:462
+msgid "Healthy"
+msgstr ""
+
+#: app/templates/admin/dashboard.html:469
+msgid "Database"
+msgstr ""
+
+#: app/templates/admin/dashboard.html:471
+msgid "Connected"
+msgstr ""
+
+#: app/templates/admin/dashboard.html:478
+msgid "Blockchain Sync"
+msgstr ""
+
+#: app/templates/admin/dashboard.html:480
+msgid "Syncing"
+msgstr ""
+
+#: app/templates/admin/dashboard.html:485
+msgid "System Load"
+msgstr ""
+
+#: app/templates/admin/dashboard.html:495
+msgid "Uptime (30 days)"
+msgstr ""
+
+#: app/templates/admin/dashboard.html:507
+msgid "Live Market Rates"
+msgstr ""
+
+#: app/templates/admin/dashboard.html:510
+msgid "Live"
+msgstr ""
+
+#: app/templates/admin/dashboard.html:568
+msgid "Updated"
+msgstr ""
+
+#: app/templates/admin/dashboard.html:568
+msgid "now"
+msgstr ""
+
+#: app/templates/admin/dashboard.html:581
+msgid "Growth Snapshot"
+msgstr ""
+
+#: app/templates/admin/dashboard.html:583
+#, fuzzy
+msgid "vs Last Month"
+msgstr "geçen aydan itibaren"
+
+#: app/templates/admin/dashboard.html:593
+#, fuzzy
+msgid "Revenue"
+msgstr "Toplam Gelir"
+
+#: app/templates/admin/dashboard.html:603
+msgid "Transactions"
+msgstr ""
+
+#: app/templates/admin/dashboard.html:613
+msgid "Clients"
+msgstr ""
+
+#: app/templates/admin/dashboard.html:623
+msgid "Commission"
+msgstr ""
+
+#: app/templates/admin/dashboard.html:631
+msgid "Strong Growth Across All Metrics"
+msgstr ""
+
+#: app/templates/admin/dashboard.html:646
+msgid "Client Balances Summary"
+msgstr ""
+
+#: app/templates/admin/dashboard.html:669
+msgid "Currency"
+msgstr ""
+
+#: app/templates/admin/dashboard.html:670
+msgid "Total Balance"
+msgstr ""
+
+#: app/templates/admin/dashboard.html:671
+msgid "Active Clients"
+msgstr ""
+
+#: app/templates/admin/dashboard.html:672
+msgid "Avg Balance"
+msgstr ""
+
+#: app/templates/admin/dashboard.html:707
+msgid "Flagged Activity"
+msgstr ""
+
+#: app/templates/admin/dashboard.html:719
+msgid "High Transaction Fee"
+msgstr ""
+
+#: app/templates/admin/dashboard.html:720
+msgid "Client ID"
+msgstr ""
+
+#: app/templates/admin/dashboard.html:720
+msgid "Fee"
+msgstr ""
+
+#: app/templates/admin/dashboard.html:721
+msgid "5 minutes ago"
+msgstr ""
+
+#: app/templates/admin/dashboard.html:731
+msgid "Failed Withdrawal"
+msgstr ""
+
+#: app/templates/admin/dashboard.html:732
+msgid "Multiple attempts"
+msgstr ""
+
+#: app/templates/admin/dashboard.html:733
+msgid "12 minutes ago"
+msgstr ""
+
+#: app/templates/admin/dashboard.html:743
+msgid "Suspicious Login"
+msgstr ""
+
+#: app/templates/admin/dashboard.html:744
+msgid "New IP location"
+msgstr ""
+
+#: app/templates/admin/dashboard.html:745
+msgid "28 minutes ago"
+msgstr ""
+
+#: app/templates/admin/dashboard.html:752
+msgid "Review All Alerts"
+msgstr ""
+

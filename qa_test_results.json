@@ -1,0 +1,121 @@
+[
+  {
+    "test": "Health Endpoint",
+    "status": "PASS",
+    "message": "Service is healthy",
+    "details": null,
+    "timestamp": "2025-07-06T22:44:11.253773"
+  },
+  {
+    "test": "Health Detailed Endpoint",
+    "status": "FAIL",
+    "message": "HTTP 404",
+    "details": null,
+    "timestamp": "2025-07-06T22:44:11.257475"
+  },
+  {
+    "test": "Security Headers",
+    "status": "WARNING",
+    "message": "Missing headers: Strict-Transport-Security",
+    "details": null,
+    "timestamp": "2025-07-06T22:44:11.261775"
+  },
+  {
+    "test": "Admin Path Obfuscation",
+    "status": "PASS",
+    "message": "All admin paths properly obfuscated",
+    "details": null,
+    "timestamp": "2025-07-06T22:44:11.274522"
+  },
+  {
+    "test": "Rate Limiting",
+    "status": "WARNING",
+    "message": "Rate limiting not triggered",
+    "details": null,
+    "timestamp": "2025-07-06T22:44:12.328030"
+  },
+  {
+    "test": "Client Registration",
+    "status": "FAIL",
+    "message": "Registration page returned 500",
+    "details": null,
+    "timestamp": "2025-07-06T22:44:12.342622"
+  },
+  {
+    "test": "API Endpoint /api/docs",
+    "status": "FAIL",
+    "message": "HTTP 404",
+    "details": null,
+    "timestamp": "2025-07-06T22:44:12.347137"
+  },
+  {
+    "test": "API Endpoint /api/v1/status",
+    "status": "FAIL",
+    "message": "HTTP 404",
+    "details": null,
+    "timestamp": "2025-07-06T22:44:12.350830"
+  },
+  {
+    "test": "API Endpoint /api/v1/rates",
+    "status": "FAIL",
+    "message": "HTTP 404",
+    "details": null,
+    "timestamp": "2025-07-06T22:44:12.355526"
+  },
+  {
+    "test": "Admin Login",
+    "status": "FAIL",
+    "message": "Login failed: 400",
+    "details": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <meta name=\"csrf-token\" content=\"IjkzYTEwZGI0MmRhOGU0O",
+    "timestamp": "2025-07-06T22:44:12.366386"
+  },
+  {
+    "test": "Admin Dashboard",
+    "status": "FAIL",
+    "message": "Dashboard HTTP 404",
+    "details": null,
+    "timestamp": "2025-07-06T22:44:12.370467"
+  },
+  {
+    "test": "Admin Analytics",
+    "status": "FAIL",
+    "message": "Analytics HTTP 404",
+    "details": null,
+    "timestamp": "2025-07-06T22:44:12.374681"
+  },
+  {
+    "test": "Admin Logout",
+    "status": "PASS",
+    "message": "Logout successful",
+    "details": null,
+    "timestamp": "2025-07-06T22:44:12.390562"
+  },
+  {
+    "test": "Internationalization",
+    "status": "PASS",
+    "message": "Language switching accessible",
+    "details": null,
+    "timestamp": "2025-07-06T22:44:12.394648"
+  },
+  {
+    "test": "Static Asset /static/css/style.css",
+    "status": "WARNING",
+    "message": "HTTP 404",
+    "details": null,
+    "timestamp": "2025-07-06T22:44:12.397855"
+  },
+  {
+    "test": "Static Asset /static/js/main.js",
+    "status": "WARNING",
+    "message": "HTTP 404",
+    "details": null,
+    "timestamp": "2025-07-06T22:44:12.401602"
+  },
+  {
+    "test": "Static Asset /static/favicon.ico",
+    "status": "WARNING",
+    "message": "HTTP 404",
+    "details": null,
+    "timestamp": "2025-07-06T22:44:12.405990"
+  }
+]

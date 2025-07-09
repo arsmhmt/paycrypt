@@ -1,0 +1,49 @@
+# This file is a backup of the removed settings.py model.
+# The original settings.py model conflicted with setting.py and was removed to resolve SQLAlchemy table conflicts.
+# If you need to restore any logic, copy it from here.
+
+from .base import db
+from .enums import SettingType, SettingKey
+
+class Setting(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    key = db.Column(db.String(100), nullable=False, unique=True)
+    type = db.Column(db.Enum(SettingType), nullable=False)
+    value = db.Column(db.Text, nullable=False)
+    description = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+    updated_at = db.Column(db.DateTime, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
+
+    def __repr__(self):
+        return f'<Setting {self.key}>'
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'key': self.key,
+            'type': self.type.value,
+            'value': self.value,
+            'description': self.description,
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat()
+        }
+
+    @classmethod
+    def get_setting(cls, key):
+        """Get a setting by key."""
+        return cls.query.filter_by(key=key).first()
+
+    @classmethod
+    def get_all_settings(cls):
+        """Get all settings."""
+        return cls.query.all()
+
+    @classmethod
+    def update_setting(cls, key, value):
+        """Update a setting's value."""
+        setting = cls.get_setting(key)
+        if setting:
+            setting.value = value
+            db.session.commit()
+            return setting
+        return None

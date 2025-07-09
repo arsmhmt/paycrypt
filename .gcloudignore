@@ -1,0 +1,145 @@
+# This file specifies files that are *not* uploaded to Google Cloud
+# using gcloud commands and by the Google Cloud Console.
+# For more information, run:
+#   $ gcloud topic gcloudignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+.venv
+venv/
+.venv_new/
+
+# PRODUCTION READY - EXCLUDE ALL TEST AND DEBUG FILES
+test_*
+debug_*
+demo_*
+quick_*
+create_test_*
+fix_*
+remove_*
+truncate_*
+verify_*
+validate_*
+check_*
+migrate_*
+
+# Specific development files
+hash_password.py
+init_db.py
+final_verification.py
+direct_login_test.py
+run_auth_tests.py
+update_imports.py
+production_cleanup_analysis.py
+
+# Database files (should be in instance/)
+*.db
+*.sqlite
+*.sqlite3
+app.db
+
+# Test HTML files
+bootstrap_test.html
+sidebar_test.html
+dropdown_debug.html
+
+# Environment files
+.env*
+!.env.example
+
+# Logs and temporary files
+*.log
+logs/
+*.tmp
+*.bak
+*.swp
+*~
+
+# Uploads and instance data
+uploads/
+instance/
+data/
+
+# IDE and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Documentation drafts and notes
+*_DRAFT.md
+*_NOTES.md
+*_TEMP.md
+*_BACKUP.md
+*_OLD.md
+*_IMPLEMENTATION_*.md
+*_ENHANCEMENT_*.md
+*_STATE_*.md
+*_REPORT.md
+*_SUMMARY.md
+JWT_TESTING.md
+*.pot
+
+# Translation files
+messages.pot
+babel.cfg
+
+# Build and deployment scripts
+deploy.sh
+cloudbuild.yaml
+
+# Requirements backup
+requirements-update.txt
+
+# Static analysis and test directories
+tests/
+static/test/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Local development
+*.db
+*.sqlite3
+instance/
+
+# Environment files
+.env
+
+# Logs
+*.log
+
+# Local development scripts
+create_admin_table.py
+create_db.py
+fix_admin.py
+hash_password.py
+init_db.py
+reinit_db.py
+reset_db.py
+run_migration.py
+update_admin.py
+update_admin_schema.py
+update_admin_templates.py
+update_imports.py
+
+# Old files
+old_files/
+
+# Uploads (handled by Cloud Storage)
+uploads/

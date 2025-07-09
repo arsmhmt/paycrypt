@@ -1,0 +1,223 @@
+{
+  "info": {
+    "name": "PayCrypt API",
+    "description": "Complete API collection for PayCrypt crypto payment gateway integration",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{api_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://api.paycrypt.online",
+      "type": "string"
+    },
+    {
+      "key": "api_token",
+      "value": "your_api_token_here",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Get API Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"client_id\": \"{{client_id}}\",\n  \"client_secret\": \"{{client_secret}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/token",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "token"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "Create Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{api_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 100.0,\n  \"currency\": \"USD\",\n  \"crypto_currency\": \"BTC\",\n  \"order_id\": \"ORDER_12345\",\n  \"callback_url\": \"https://your-site.com/payment/callback\",\n  \"return_url\": \"https://your-site.com/payment/success\",\n  \"description\": \"Payment for order #12345\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/payments",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "payments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Payment Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{api_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/payments/{{payment_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "payments",
+                "{{payment_id}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Webhooks",
+      "item": [
+        {
+          "name": "Get Webhook Events",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{api_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/webhooks/events",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "webhooks",
+                "events"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Configure Webhook",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{api_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"url\": \"https://your-site.com/webhook/paycrypt\",\n  \"events\": [\n    \"payment.completed\",\n    \"payment.failed\",\n    \"payment.pending\"\n  ],\n  \"secret\": \"your_webhook_secret\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/webhooks",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "webhooks"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Account Management",
+      "item": [
+        {
+          "name": "Get Account Info",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{api_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/account",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "account"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Usage Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{api_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/account/usage",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "account",
+                "usage"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

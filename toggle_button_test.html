@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta charset="UTF-8">
+        <title>Toggle Button Orange Test</title>
+        <style>
+            body {
+                background: #212529;
+                color: white;
+                font-family: 'Inter', sans-serif;
+                padding: 20px;
+            }
+
+            :root {
+                --orange: #FF6B35;
+                --orange-hover: #e05d2e;
+                --orange-dark: #d64f28;
+            }
+
+            .test-container {
+                background: #212529;
+                padding: 20px;
+                border: 1px solid #333;
+                margin-bottom: 20px;
+            }
+
+            /* Enhanced Orange Toggle Button */
+            #sidebarToggle {
+                color: var(--orange) !important;
+                background: transparent !important;
+                border: none !important;
+                font-size: 1.2rem;
+                transition: all 0.3s ease;
+                padding: 0.5rem;
+                border-radius: 6px;
+                cursor: pointer;
+            }
+
+            #sidebarToggle:hover {
+                color: var(--orange-hover) !important;
+                background: rgba(255, 107, 53, 0.1) !important;
+                transform: scale(1.1);
+            }
+
+            #sidebarToggle:focus {
+                box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.3) !important;
+                color: var(--orange) !important;
+                background: rgba(255, 107, 53, 0.05) !important;
+                outline: none !important;
+            }
+
+            #sidebarToggle:active {
+                color: var(--orange-dark) !important;
+                background: rgba(255, 107, 53, 0.15) !important;
+                transform: scale(1.05);
+            }
+
+            #sidebarToggle i,
+            #sidebarToggle .fas {
+                color: var(--orange) !important;
+            }
+
+            #sidebarToggle:hover i,
+            #sidebarToggle:hover .fas {
+                color: var(--orange-hover) !important;
+            }
+
+            .demo-bar {
+                background: #212529;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                padding: 1rem;
+                display: flex;
+                align-items: center;
+            }
+        </style>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    </head>
+
+    <body>
+        <h2>Orange Toggle Button Test</h2>
+
+        <div class="test-container">
+            <div class="demo-bar">
+                <button id="sidebarToggle" type="button" title="Toggle Sidebar">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <span style="margin-left: 1rem;">Hover, click, and focus to test orange states</span>
+            </div>
+        </div>
+
+        <h3>Colors Used:</h3>
+        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+            <div style="background: #FF6B35; padding: 1rem; border-radius: 6px;">
+                <strong>--orange: #FF6B35</strong>
+            </div>
+            <div style="background: #e05d2e; padding: 1rem; border-radius: 6px;">
+                <strong>--orange-hover: #e05d2e</strong>
+            </div>
+            <div style="background: #d64f28; padding: 1rem; border-radius: 6px;">
+                <strong>--orange-dark: #d64f28</strong>
+            </div>
+        </div>
+
+        <script>
+            // Add some interactivity to test the button
+            document.getElementById('sidebarToggle').addEventListener('click', function () {
+                alert('Toggle button clicked! Orange styling working correctly.');
+            });
+        </script>
+    </body>
+
+</html>

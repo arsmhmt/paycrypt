@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Analytics Dropdown</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .debug-box { background: #f5f5f5; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .error { color: red; }
+        .success { color: green; }
+        .warning { color: orange; }
+    </style>
+</head>
+<body>
+    <h1>Analytics Page Dropdown Debug</h1>
+    
+    <div class="debug-box">
+        <h3>JavaScript Debug Script</h3>
+        <p>Copy and paste this script into the browser console on the analytics page:</p>
+        <textarea style="width: 100%; height: 300px;" readonly>
+// Debug script for analytics page dropdown issues
+console.log('=== DROPDOWN DEBUG START ===');
+
+// Check if Bootstrap is loaded
+if (typeof bootstrap !== 'undefined') {
+    console.log('✅ Bootstrap is loaded (version: ' + bootstrap.Tooltip.VERSION + ')');
+    
+    if (bootstrap.Collapse) {
+        console.log('✅ Bootstrap Collapse is available');
+    } else {
+        console.log('❌ Bootstrap Collapse is NOT available');
+    }
+} else {
+    console.log('❌ Bootstrap is NOT loaded');
+}
+
+// Check Chart.js
+if (typeof Chart !== 'undefined') {
+    console.log('✅ Chart.js is loaded (version: ' + Chart.version + ')');
+} else {
+    console.log('❌ Chart.js is NOT loaded');
+}
+
+// Check dropdown elements
+const dropdownToggles = document.querySelectorAll('[data-bs-toggle="collapse"]');
+console.log('Found ' + dropdownToggles.length + ' dropdown toggles');
+
+dropdownToggles.forEach((toggle, index) => {
+    const target = toggle.getAttribute('data-bs-target');
+    const targetElement = document.querySelector(target);
+    
+    console.log('Dropdown ' + (index + 1) + ':');
+    console.log('  - Toggle element:', toggle);
+    console.log('  - Target selector:', target);
+    console.log('  - Target element:', targetElement);
+    console.log('  - Target element found:', !!targetElement);
+    
+    if (targetElement) {
+        const instance = bootstrap.Collapse.getInstance(targetElement);
+        console.log('  - Bootstrap instance:', instance);
+        
+        // Try to manually create instance if none exists
+        if (!instance) {
+            try {
+                const newInstance = new bootstrap.Collapse(targetElement, { toggle: false });
+                console.log('  - Created new instance:', newInstance);
+            } catch (e) {
+                console.log('  - Error creating instance:', e);
+            }
+        }
+    }
+    
+    // Check if toggle has click events
+    const events = getEventListeners ? getEventListeners(toggle) : 'getEventListeners not available';
+    console.log('  - Event listeners:', events);
+});
+
+// Test manual dropdown trigger
+console.log('Testing manual dropdown trigger...');
+if (dropdownToggles.length > 0) {
+    const firstToggle = dropdownToggles[0];
+    const targetSelector = firstToggle.getAttribute('data-bs-target');
+    const targetElement = document.querySelector(targetSelector);
+    
+    if (targetElement) {
+        console.log('Attempting to manually trigger first dropdown...');
+        try {
+            const collapse = bootstrap.Collapse.getOrCreateInstance(targetElement);
+            collapse.toggle();
+            console.log('✅ Manual trigger successful');
+        } catch (e) {
+            console.log('❌ Manual trigger failed:', e);
+        }
+    }
+}
+
+console.log('=== DROPDOWN DEBUG END ===');
+        </textarea>
+    </div>
+    
+    <div class="debug-box">
+        <h3>Quick CSS Test</h3>
+        <p>Also try this CSS in the console to test for pointer-events issues:</p>
+        <textarea style="width: 100%; height: 100px;" readonly>
+// Test if elements are being blocked
+document.querySelectorAll('[data-bs-toggle="collapse"]').forEach(el => {
+    el.style.zIndex = '9999';
+    el.style.position = 'relative';
+    el.style.pointerEvents = 'auto';
+    console.log('Applied debug styles to:', el);
+});
+        </textarea>
+    </div>
+</body>
+</html>

@@ -1,0 +1,121 @@
+[
+  {
+    "test": "Health Endpoint",
+    "status": "FAIL",
+    "message": "Connection error: HTTPConnectionPool(host='127.0.0.1', port=8080): Max retries exceeded with url: /health (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000243D07F2BA0>: Failed to establish a new connection: [WinError 10061] Hedef makine etkin olarak reddetti\u011finden ba\u011flant\u0131 kurulamad\u0131'))",
+    "details": null,
+    "timestamp": "2025-07-06T22:22:09.879930"
+  },
+  {
+    "test": "Health Detailed Endpoint",
+    "status": "FAIL",
+    "message": "Connection error: HTTPConnectionPool(host='127.0.0.1', port=8080): Max retries exceeded with url: /health/detailed (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000243D07BEE90>: Failed to establish a new connection: [WinError 10061] Hedef makine etkin olarak reddetti\u011finden ba\u011flant\u0131 kurulamad\u0131'))",
+    "details": null,
+    "timestamp": "2025-07-06T22:22:11.940419"
+  },
+  {
+    "test": "Security Headers",
+    "status": "FAIL",
+    "message": "Error: HTTPConnectionPool(host='127.0.0.1', port=8080): Max retries exceeded with url: /admin120724 (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000243D07BF390>: Failed to establish a new connection: [WinError 10061] Hedef makine etkin olarak reddetti\u011finden ba\u011flant\u0131 kurulamad\u0131'))",
+    "details": null,
+    "timestamp": "2025-07-06T22:22:13.966865"
+  },
+  {
+    "test": "Admin Path Obfuscation",
+    "status": "FAIL",
+    "message": "Error: HTTPConnectionPool(host='127.0.0.1', port=8080): Max retries exceeded with url: /admin (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000243D079B5C0>: Failed to establish a new connection: [WinError 10061] Hedef makine etkin olarak reddetti\u011finden ba\u011flant\u0131 kurulamad\u0131'))",
+    "details": null,
+    "timestamp": "2025-07-06T22:22:16.001723"
+  },
+  {
+    "test": "Rate Limiting",
+    "status": "FAIL",
+    "message": "Error: HTTPConnectionPool(host='127.0.0.1', port=8080): Max retries exceeded with url: /auth/login (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000243D079B950>: Failed to establish a new connection: [WinError 10061] Hedef makine etkin olarak reddetti\u011finden ba\u011flant\u0131 kurulamad\u0131'))",
+    "details": null,
+    "timestamp": "2025-07-06T22:22:18.020134"
+  },
+  {
+    "test": "Client Registration",
+    "status": "FAIL",
+    "message": "Error: HTTPConnectionPool(host='127.0.0.1', port=8080): Max retries exceeded with url: /auth/register (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000243D086DEB0>: Failed to establish a new connection: [WinError 10061] Hedef makine etkin olarak reddetti\u011finden ba\u011flant\u0131 kurulamad\u0131'))",
+    "details": null,
+    "timestamp": "2025-07-06T22:22:20.038862"
+  },
+  {
+    "test": "API Endpoint /api/docs",
+    "status": "FAIL",
+    "message": "Error: HTTPConnectionPool(host='127.0.0.1', port=8080): Max retries exceeded with url: /api/docs (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000243D0864E20>: Failed to establish a new connection: [WinError 10061] Hedef makine etkin olarak reddetti\u011finden ba\u011flant\u0131 kurulamad\u0131'))",
+    "details": null,
+    "timestamp": "2025-07-06T22:22:22.062750"
+  },
+  {
+    "test": "API Endpoint /api/v1/status",
+    "status": "FAIL",
+    "message": "Error: HTTPConnectionPool(host='127.0.0.1', port=8080): Max retries exceeded with url: /api/v1/status (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000243D0864490>: Failed to establish a new connection: [WinError 10061] Hedef makine etkin olarak reddetti\u011finden ba\u011flant\u0131 kurulamad\u0131'))",
+    "details": null,
+    "timestamp": "2025-07-06T22:22:24.079309"
+  },
+  {
+    "test": "API Endpoint /api/v1/rates",
+    "status": "FAIL",
+    "message": "Error: HTTPConnectionPool(host='127.0.0.1', port=8080): Max retries exceeded with url: /api/v1/rates (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000243D08656A0>: Failed to establish a new connection: [WinError 10061] Hedef makine etkin olarak reddetti\u011finden ba\u011flant\u0131 kurulamad\u0131'))",
+    "details": null,
+    "timestamp": "2025-07-06T22:22:26.317440"
+  },
+  {
+    "test": "Admin Login",
+    "status": "FAIL",
+    "message": "Exception: HTTPConnectionPool(host='127.0.0.1', port=8080): Max retries exceeded with url: /admin120724/login (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000243D08658C0>: Failed to establish a new connection: [WinError 10061] Hedef makine etkin olarak reddetti\u011finden ba\u011flant\u0131 kurulamad\u0131'))",
+    "details": null,
+    "timestamp": "2025-07-06T22:22:28.495953"
+  },
+  {
+    "test": "Admin Dashboard",
+    "status": "FAIL",
+    "message": "Exception: HTTPConnectionPool(host='127.0.0.1', port=8080): Max retries exceeded with url: /admin120724/dashboard (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000243D0865BF0>: Failed to establish a new connection: [WinError 10061] Hedef makine etkin olarak reddetti\u011finden ba\u011flant\u0131 kurulamad\u0131'))",
+    "details": null,
+    "timestamp": "2025-07-06T22:22:30.979851"
+  },
+  {
+    "test": "Admin Analytics",
+    "status": "FAIL",
+    "message": "Exception: HTTPConnectionPool(host='127.0.0.1', port=8080): Max retries exceeded with url: /admin120724/analytics (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000243D0865E10>: Failed to establish a new connection: [WinError 10061] Hedef makine etkin olarak reddetti\u011finden ba\u011flant\u0131 kurulamad\u0131'))",
+    "details": null,
+    "timestamp": "2025-07-06T22:22:33.011882"
+  },
+  {
+    "test": "Admin Logout",
+    "status": "FAIL",
+    "message": "Exception: HTTPConnectionPool(host='127.0.0.1', port=8080): Max retries exceeded with url: /admin120724/logout (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000243D0866030>: Failed to establish a new connection: [WinError 10061] Hedef makine etkin olarak reddetti\u011finden ba\u011flant\u0131 kurulamad\u0131'))",
+    "details": null,
+    "timestamp": "2025-07-06T22:22:35.279884"
+  },
+  {
+    "test": "Internationalization",
+    "status": "FAIL",
+    "message": "Error: HTTPConnectionPool(host='127.0.0.1', port=8080): Max retries exceeded with url: /admin120724?lang=tr (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000243D0866250>: Failed to establish a new connection: [WinError 10061] Hedef makine etkin olarak reddetti\u011finden ba\u011flant\u0131 kurulamad\u0131'))",
+    "details": null,
+    "timestamp": "2025-07-06T22:22:37.301413"
+  },
+  {
+    "test": "Static Asset /static/css/style.css",
+    "status": "WARNING",
+    "message": "Error: HTTPConnectionPool(host='127.0.0.1', port=8080): Max retries exceeded with url: /static/css/style.css (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000243D0866470>: Failed to establish a new connection: [WinError 10061] Hedef makine etkin olarak reddetti\u011finden ba\u011flant\u0131 kurulamad\u0131'))",
+    "details": null,
+    "timestamp": "2025-07-06T22:22:39.692298"
+  },
+  {
+    "test": "Static Asset /static/js/main.js",
+    "status": "WARNING",
+    "message": "Error: HTTPConnectionPool(host='127.0.0.1', port=8080): Max retries exceeded with url: /static/js/main.js (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000243D08667A0>: Failed to establish a new connection: [WinError 10061] Hedef makine etkin olarak reddetti\u011finden ba\u011flant\u0131 kurulamad\u0131'))",
+    "details": null,
+    "timestamp": "2025-07-06T22:22:41.712457"
+  },
+  {
+    "test": "Static Asset /static/favicon.ico",
+    "status": "WARNING",
+    "message": "Error: HTTPConnectionPool(host='127.0.0.1', port=8080): Max retries exceeded with url: /static/favicon.ico (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x00000243D08669C0>: Failed to establish a new connection: [WinError 10061] Hedef makine etkin olarak reddetti\u011finden ba\u011flant\u0131 kurulamad\u0131'))",
+    "details": null,
+    "timestamp": "2025-07-06T22:22:43.746301"
+  }
+]

@@ -1,0 +1,29 @@
+{
+  "monitors": [
+    {
+      "friendly_name": "PayCrypt Main Site",
+      "url": "https://paycrypt.online/health",
+      "type": 1,
+      "interval": 300,
+      "timeout": 30,
+      "keyword_type": 1,
+      "keyword_value": "healthy"
+    },
+    {
+      "friendly_name": "PayCrypt Dashboard",
+      "url": "https://dashboard.paycrypt.online/health",
+      "type": 1,
+      "interval": 300,
+      "timeout": 30,
+      "keyword_type": 1,
+      "keyword_value": "healthy"
+    }
+  ],
+  "alert_contacts": [
+    {
+      "type": 2,
+      "value": "admin@paycrypt.online",
+      "friendly_name": "Admin Email"
+    }
+  ]
+}

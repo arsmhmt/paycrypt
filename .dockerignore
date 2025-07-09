@@ -1,0 +1,104 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+.venv
+venv/
+.venv_new/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Local development
+*.db
+*.sqlite3
+instance/
+
+# Environment files
+.env
+
+# Logs
+*.log
+
+# ALL TEST, DEBUG, AND DEVELOPMENT FILES (PRODUCTION DOCKER BUILD)
+test_*
+debug_*
+demo_*
+quick_*
+create_test_*
+fix_*
+remove_*
+truncate_*
+verify_*
+validate_*
+check_*
+migrate_*
+
+# Specific development files
+hash_password.py
+init_db.py
+final_verification.py
+direct_login_test.py
+run_auth_tests.py
+update_imports.py
+production_cleanup_analysis.py
+
+# Test HTML files
+bootstrap_test.html
+sidebar_test.html
+dropdown_debug.html
+
+# Documentation and notes
+*_DRAFT.md
+*_NOTES.md
+*_TEMP.md
+*_BACKUP.md
+*_OLD.md
+*_IMPLEMENTATION_*.md
+*_ENHANCEMENT_*.md
+*_STATE_*.md
+*_REPORT.md
+*_SUMMARY.md
+JWT_TESTING.md
+
+# Translation development files
+messages.pot
+babel.cfg
+
+# Data directory (if it contains test data)
+data/
+
+# Test directories
+tests/
+
+# Git files
+.git/
+.gitignore
+.gcloudignore
+
+# Deployment scripts
+deploy.sh
+cloudbuild.yaml
+
+# Requirements backup
+requirements-update.txt
+
+# Old files and cleanup
+old_files/
+production_cleanup_analysis.py
+
+# Uploads (handled by Cloud Storage)
+uploads/

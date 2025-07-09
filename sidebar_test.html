@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sidebar Dropdown Test</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        .sb-sidenav {
+            background-color: #343a40;
+            width: 250px;
+            min-height: 100vh;
+        }
+        .sb-sidenav-dark {
+            background-color: #212529;
+        }
+        .sb-sidenav-dark .nav-link {
+            color: rgba(255, 255, 255, 0.75);
+            padding: 0.75rem 1rem;
+        }
+        .sb-sidenav-dark .nav-link:hover {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .sb-sidenav-collapse-arrow {
+            margin-left: auto;
+        }
+        .sb-nav-link-icon {
+            width: 1rem;
+            display: inline-block;
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="d-flex">
+        <nav class="sb-sidenav sb-sidenav-dark">
+            <div class="sb-sidenav-menu">
+                <div class="nav">
+                    <!-- Test Dropdown 1 -->
+                    <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#testCollapse1" aria-expanded="false" aria-controls="testCollapse1">
+                        <div class="sb-nav-link-icon"><i class="bi bi-credit-card"></i></div>
+                        Test Dropdown 1
+                        <div class="sb-sidenav-collapse-arrow"><i class="bi bi-chevron-down"></i></div>
+                    </a>
+                    <div class="collapse" id="testCollapse1">
+                        <nav class="sb-sidenav-menu-nested nav">
+                            <a class="nav-link" href="#">
+                                <i class="bi bi-list me-2"></i>Item 1
+                            </a>
+                            <a class="nav-link" href="#">
+                                <i class="bi bi-plus-circle me-2"></i>Item 2
+                            </a>
+                        </nav>
+                    </div>
+                    
+                    <!-- Test Dropdown 2 -->
+                    <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#testCollapse2" aria-expanded="false" aria-controls="testCollapse2">
+                        <div class="sb-nav-link-icon"><i class="bi bi-wallet2"></i></div>
+                        Test Dropdown 2
+                        <div class="sb-sidenav-collapse-arrow"><i class="bi bi-chevron-down"></i></div>
+                    </a>
+                    <div class="collapse" id="testCollapse2">
+                        <nav class="sb-sidenav-menu-nested nav">
+                            <a class="nav-link" href="#">
+                                <i class="bi bi-list me-2"></i>Item A
+                            </a>
+                            <a class="nav-link" href="#">
+                                <i class="bi bi-check2-all me-2"></i>Item B
+                            </a>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="container-fluid p-4">
+            <h2>Sidebar Dropdown Test</h2>
+            <p>Click on the sidebar items to test if dropdowns work.</p>
+            <div id="debug-info">
+                <h4>Debug Info:</h4>
+                <p id="bootstrap-check">Checking Bootstrap...</p>
+                <p id="collapse-check">Checking Collapse...</p>
+                <p id="event-log">Event log:</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const bootstrapCheck = document.getElementById('bootstrap-check');
+            const collapseCheck = document.getElementById('collapse-check');
+            const eventLog = document.getElementById('event-log');
+            
+            // Check Bootstrap
+            if (typeof bootstrap !== 'undefined') {
+                bootstrapCheck.innerHTML = '✅ Bootstrap loaded (v' + bootstrap.Tooltip.VERSION + ')';
+                if (bootstrap.Collapse) {
+                    collapseCheck.innerHTML = '✅ Bootstrap Collapse available';
+                } else {
+                    collapseCheck.innerHTML = '❌ Bootstrap Collapse NOT available';
+                }
+            } else {
+                bootstrapCheck.innerHTML = '❌ Bootstrap NOT loaded';
+                collapseCheck.innerHTML = '❌ Cannot check Collapse';
+            }
+            
+            // Log collapse events
+            const collapseElements = document.querySelectorAll('.collapse');
+            collapseElements.forEach((element, index) => {
+                element.addEventListener('show.bs.collapse', function() {
+                    const p = document.createElement('p');
+                    p.textContent = `Collapse ${index + 1} showing...`;
+                    eventLog.appendChild(p);
+                });
+                
+                element.addEventListener('shown.bs.collapse', function() {
+                    const p = document.createElement('p');
+                    p.textContent = `Collapse ${index + 1} shown!`;
+                    eventLog.appendChild(p);
+                });
+                
+                element.addEventListener('hide.bs.collapse', function() {
+                    const p = document.createElement('p');
+                    p.textContent = `Collapse ${index + 1} hiding...`;
+                    eventLog.appendChild(p);
+                });
+            });
+            
+            // Log click events on toggle links
+            const toggleLinks = document.querySelectorAll('[data-bs-toggle="collapse"]');
+            toggleLinks.forEach((link, index) => {
+                link.addEventListener('click', function(e) {
+                    const p = document.createElement('p');
+                    p.textContent = `Toggle link ${index + 1} clicked! Target: ${this.getAttribute('data-bs-target')}`;
+                    eventLog.appendChild(p);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

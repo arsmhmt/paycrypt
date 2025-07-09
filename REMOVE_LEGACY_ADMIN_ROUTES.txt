@@ -1,0 +1,9 @@
+Remove or rename the following legacy files to prevent accidental import and registration of old admin blueprints:
+
+- app/admin_routes.py
+- app/admin_routes.py.bak
+- app/admin_routes_clean.py
+
+Only use the secure admin blueprint in app/admin/routes.py.
+
+This will ensure that no old /admin routes are ever registered.

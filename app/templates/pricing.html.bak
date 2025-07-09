@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Choose Your Plan - Crypto Payment Gateway</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+        <style>
+            :root {
+                --primary-color: #ff6a00;
+                /* Orange */
+                --secondary-color: #23272a;
+                /* Steel black */
+                --accent-color: #ffb347;
+                /* Lighter orange for highlights */
+                --success-color: #10b981;
+                --warning-color: #f59e0b;
+                --dark-color: #23272a;
+                /* Steel black */
+            }
+
+            body {
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+                background: #fff;
+                min-height: 100vh;
+            }
+
+            .hero-section {
+                padding: 70px 0 40px;
+                color: #23272a;
+                text-align: center;
+                background: #fff;
+            }
+
+            .hero-title {
+                font-size: 3.5rem;
+                font-weight: 800;
+                margin-bottom: 0.7rem;
+                background: linear-gradient(135deg, #ff6a00 0%, #23272a 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                letter-spacing: -1px;
+                text-shadow: 0 2px 8px rgba(255, 106, 0, 0.09);
+                user-select: text;
+            }
+
+            .hero-accent-bar {
+                width: 80px;
+                height: 5px;
+                margin: 0 auto 22px auto;
+                border-radius: 4px;
+                background: linear-gradient(90deg, #ffb347 0%, #ff6a00 100%);
+                opacity: 0.95;
+            }
+
+            .hero-subtitle {
+                font-size: 1.32rem;
+                color: #23272a;
+                font-weight: 600;
+                margin-bottom: 2.2rem;
+                opacity: 1;
+                letter-spacing: 0.01em;
+                text-shadow: 0 1px 0 #fff, 0 2px 8px rgba(35, 39, 42, 0.07);
+                user-select: text;
+            }
+
+            .pricing-container {
+                background: white;
+                border-radius: 20px;
+                box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+                margin: -40px 20px 80px;
+                position: relative;
+            }
+
+            .pricing-toggle {
+                background: #f8fafc;
+                padding: 40px 0 20px;
+                text-align: center;
+                border-bottom: 1px solid #e2e8f0;
+            }
+
+            .toggle-switch {
+                display: inline-flex;
+                align-items: center;
+                background: white;
+                border-radius: 50px;
+                padding: 4px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            }
+
+            .toggle-option {
+                padding: 12px 24px;
+                border-radius: 50px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                color: #64748b;
+            }
+
+            .toggle-option.active {
+                background: var(--primary-color);
+                color: white;
+                box-shadow: 0 4px 12px rgba(255, 106, 0, 0.3);
+            }
+
+            .pricing-grid {
+                padding: 60px 40px;
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+                gap: 30px;
+                max-width: 1200px;
+                margin: 0 auto;
+            }
+
+            .pricing-card {
+                background: white;
+                border-radius: 16px;
+                padding: 40px 30px;
+                position: relative;
+                transition: all 0.3s ease;
+                border: 2px solid #f1f5f9;
+                height: fit-content;
+            }
+
+            .pricing-card:hover {
+                transform: translateY(-8px);
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+                border-color: var(--primary-color);
+            }
+
+            .pricing-card.popular {
+                border-color: var(--primary-color);
+                position: relative;
+                transform: scale(1.05);
+                z-index: 2;
+            }
+
+            .popular-badge {
+                position: absolute;
+                top: -12px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+                color: var(--dark-color);
+                padding: 8px 24px;
+                border-radius: 20px;
+                font-size: 0.875rem;
+                font-weight: 600;
+                box-shadow: 0 4px 12px rgba(255, 106, 0, 0.2);
+            }
+
+            .plan-name {
+                font-size: 1.5rem;
+                font-weight: 700;
+                color: var(--dark-color);
+                margin-bottom: 8px;
+            }
+
+            .plan-description {
+                color: #64748b;
+                margin-bottom: 24px;
+                line-height: 1.6;
+            }
+
+            .plan-price {
+                margin-bottom: 32px;
+            }
+
+            .price-amount {
+                font-size: 3rem;
+                font-weight: 700;
+                color: var(--dark-color);
+                line-height: 1;
+            }
+
+            .price-period {
+                color: #64748b;
+                font-size: 1rem;
+                font-weight: 500;
+            }
+
+            .commission-badge {
+                background: var(--primary-color);
+                color: var(--dark-color);
+                padding: 4px 12px;
+                border-radius: 12px;
+                font-size: 0.875rem;
+                font-weight: 600;
+                margin-left: 8px;
+            }
+
+            .setup-fee {
+                color: #64748b;
+                font-size: 0.9rem;
+                font-weight: 500;
+                margin-top: 4px;
+            }
+
+            .volume-limit {
+                color: var(--primary-color);
+                font-size: 0.9rem;
+                font-weight: 600;
+                margin-top: 4px;
+            }
+
+            .margin-info {
+                color: var(--success-color);
+                font-size: 0.85rem;
+                font-weight: 600;
+                margin-top: 2px;
+                opacity: 0.8;
+            }
+
+            .feature-list {
+                list-style: none;
+                padding: 0;
+                margin-bottom: 32px;
+            }
+
+            .feature-item {
+                display: flex;
+                align-items: center;
+                padding: 12px 0;
+                border-bottom: 1px solid #f1f5f9;
+            }
+
+            .feature-item:last-child {
+                border-bottom: none;
+            }
+
+            .feature-icon {
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                background: var(--success-color);
+                color: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-right: 12px;
+                font-size: 0.75rem;
+            }
+
+            .feature-text {
+                color: #334155;
+                font-weight: 500;
+            }
+
+            .select-plan-btn {
+                width: 100%;
+                padding: 16px 24px;
+                border-radius: 12px;
+                font-weight: 600;
+                font-size: 1rem;
+                border: none;
+                transition: all 0.3s ease;
+                text-decoration: none;
+                display: inline-block;
+                text-align: center;
+            }
+
+            .btn-primary-plan {
+                background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+                color: white;
+                box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+            }
+
+            .btn-primary-plan:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+                color: white;
+            }
+
+            .btn-outline-plan {
+                background: white;
+                color: var(--primary-color);
+                border: 2px solid var(--primary-color);
+            }
+
+            .btn-outline-plan:hover {
+                background: var(--primary-color);
+                color: white;
+                transform: translateY(-2px);
+            }
+
+            .type-indicator {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                background: #f1f5f9;
+                color: #64748b;
+                padding: 6px 12px;
+                border-radius: 20px;
+                font-size: 0.75rem;
+                font-weight: 600;
+            }
+
+            .commission-type {
+                background: linear-gradient(135deg, #10b981, #059669);
+                color: white;
+            }
+
+            .flatrate-type {
+                background: linear-gradient(135deg, #f59e0b, #d97706);
+                color: white;
+            }
+
+            @media (max-width: 768px) {
+                .hero-title {
+                    font-size: 2.5rem;
+                }
+
+                .pricing-grid {
+                    padding: 40px 20px;
+                    grid-template-columns: 1fr;
+                }
+
+                .pricing-card.popular {
+                    transform: none;
+                }
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="hero-section">
+            <div class="container">
+                <h1 class="hero-title">Choose Your Plan</h1>
+                <div class="hero-accent-bar"></div>
+                <p class="hero-subtitle">Select the perfect package for your crypto payment needs</p>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="pricing-container">
+                <div class="pricing-toggle">
+                    <div class="toggle-switch">
+                        <div class="toggle-option" data-type="commission">
+                            Commission-Based
+                            <small class="d-block" style="font-size: 0.75rem; opacity: 0.8;">We manage wallets</small>
+                        </div>
+                        <div class="toggle-option active" data-type="flatrate">
+                            Flat-Rate
+                            <small class="d-block" style="font-size: 0.75rem; opacity: 0.8;">Use your own
+                                wallets</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pricing-grid" id="commission-plans" style="display: none;">
+                    {% for slug, pkg in packages_commission.items() %}
+                    <div class="pricing-card">
+                        <div class="plan-name">{{ pkg.name }}</div>
+                        <div class="plan-description">{{ pkg.description }}</div>
+                        <div class="plan-price">{{ pkg.commission_rate }}% commission</div>
+                        <a href="/auth/register?package={{ slug }}" class="btn btn-primary w-100 mt-4 select-plan-btn">
+                            Get Started
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="pricing-grid" id="flatrate-plans">
+                    {% for slug, pkg in packages_flatrate.items() %}
+                    <div class="pricing-card{% if pkg.is_popular %} popular{% endif %}">
+                        {% if pkg.is_popular %}
+                        <div class="popular-badge">Most Popular</div>
+                        {% endif %}
+                        <div class="plan-name">{{ pkg.name }}</div>
+                        <div class="plan-description">{{ pkg.description }}</div>
+                        <div class="plan-price">${{ pkg.monthly_price }}</div>
+                                                <a href="/auth/register?package={{ slug }}"
+                            class="btn btn-primary w-100 mt-4 select-plan-btn">
+                            Get Started
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+            <script>
+                // Toggle between Commission-Based and Flat-Rate plans
+                document.addEventListener('DOMContentLoaded', function () {
+                    const commissionToggle = document.querySelector('.toggle-option[data-type="commission"]');
+                    const flatrateToggle = document.querySelector('.toggle-option[data-type="flatrate"]');
+                    const commissionPlans = document.getElementById('commission-plans');
+                    const flatratePlans = document.getElementById('flatrate-plans');
+
+                    commissionToggle.addEventListener('click', function () {
+                        commissionToggle.classList.add('active');
+                        flatrateToggle.classList.remove('active');
+                        commissionPlans.style.display = '';
+                        flatratePlans.style.display = 'none';
+                    });
+                    flatrateToggle.addEventListener('click', function () {
+                        flatrateToggle.classList.add('active');
+                        commissionToggle.classList.remove('active');
+                        commissionPlans.style.display = 'none';
+                        flatratePlans.style.display = '';
+                    });
+                });
+            </script>
+    </body>
+
+</html>
