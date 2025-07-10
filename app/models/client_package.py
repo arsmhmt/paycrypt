@@ -22,20 +22,12 @@ class PackageStatus(Enum):
     DEPRECATED = "deprecated"
 
 
-# Import the Feature model to avoid circular imports
 from .feature import Feature
 
 
 class ClientPackage(db.Model):
     """Client packages/pricing plans"""
     __tablename__ = 'client_packages'
-    
-    # Relationships
-    features = db.relationship(
-        'Feature',
-        secondary='package_features',
-        backref='packages'
-    )
     
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)

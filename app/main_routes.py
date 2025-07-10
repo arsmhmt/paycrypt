@@ -1,6 +1,4 @@
 from flask import Blueprint, render_template, request, jsonify, current_app, redirect, url_for, session, flash, send_from_directory
-from flask_login import login_required, current_user
-import json
 from app import db
 from app.models import Payment
 from app.models.client_package import ClientPackage, ClientType, PackageStatus, REVISED_FLAT_RATE_PACKAGES
@@ -15,25 +13,6 @@ logger = logging.getLogger(__name__)
 
 # Create main blueprint
 main = Blueprint('main', __name__, url_prefix='/')
-
-@main.route('/_debug_packages')
-def debug_packages():
-    """Debug endpoint to check package data"""
-    from app.models.client_package import ClientPackage, ClientType
-    
-    flat_rate_pkgs = ClientPackage.query.filter_by(client_type=ClientType.FLAT_RATE).all()
-    flat_rate_data = [{
-        'id': p.id,
-        'name': p.name,
-        'slug': p.slug if hasattr(p, 'slug') else None,
-        'monthly_price': float(p.monthly_price) if p.monthly_price else None,
-        'status': p.status.value if p.status else None
-    } for p in flat_rate_pkgs]
-    
-    return jsonify({
-        'flat_rate_packages': flat_rate_data,
-        'flat_rate_count': len(flat_rate_pkgs)
-    })
 
 @main.route('/favicon.ico')
 def favicon():
@@ -68,65 +47,14 @@ def landing():
 @main.route('/pricing')
 def pricing():
     """Pricing page with package selection"""
-    from app.models.client_package import ClientPackage, ClientType, COMMISSION_BASED_PACKAGES, REVISED_FLAT_RATE_PACKAGES
-    
-    # Get flat-rate packages from database
-    flat_rate_packages = ClientPackage.query.filter_by(client_type=ClientType.FLAT_RATE).all()
-    
-    # Create a mapping of slugs to packages for the template
-    packages_flatrate = {}
-    for pkg in flat_rate_packages:
-        # Use the shorter slug for the URL
-        packages_flatrate[pkg.slug] = pkg
-        
-        # Debug: Print the package details
-        print(f"- {pkg.slug}: {pkg.name} (ID: {pkg.id})")
-    
+    from app.models.client_package import ClientPackage, ClientType, COMMISSION_BASED_PACKAGES
+    # Query DB for flat-rate packages so pkg.slug is the model property
+    packages_flatrate = {pkg.slug: pkg for pkg in ClientPackage.query.filter_by(client_type=ClientType.FLAT_RATE).all()}
     packages_commission = COMMISSION_BASED_PACKAGES
-    
-    # Prepare flat-rate packages for template
-    flatrate_packages = []
-    for slug, pkg in packages_flatrate.items():
-        flatrate_packages.append({
-            'slug': slug,
-            'name': pkg.name,
-            'description': pkg.description,
-            'monthly_price': pkg.monthly_price,
-            'is_popular': pkg.is_popular if hasattr(pkg, 'is_popular') else False,
-            'id': pkg.id
-        })
-    
-    # Prepare commission packages for template
-    commission_packages = []
-    for slug, pkg in packages_commission.items():
-        commission_packages.append({
-            'slug': slug,
-            'name': pkg.get('name', ''),
-            'description': pkg.get('description', ''),
-            'commission_rate': pkg.get('commission_rate', 0),
-            'is_popular': pkg.get('is_popular', False),
-            'id': slug  # Use slug as ID for commission packages
-        })
-    
-    # Debug output
-    print("\n=== DEBUG: Flat-rate packages ===")
-    for pkg in flatrate_packages:
-        print(f"- {pkg['slug']}: {pkg['name']} (ID: {pkg['id']})")
-    
-    print("\n=== DEBUG: Commission packages ===")
-    for pkg in commission_packages:
-        print(f"- {pkg['slug']}: {pkg['name']}")
-    
-    # Log database counts
-    flat_count = len(flatrate_packages)
-    print(f"\n=== DEBUG: Package counts ===")
-    print(f"Flat-rate packages: {flat_count}")
-    print(f"Commission packages: {len(commission_packages)}\n")
-    
     return render_template(
         'pricing.html',
-        packages_flatrate={pkg['slug']: pkg for pkg in flatrate_packages},
-        packages_commission={pkg['slug']: pkg for pkg in commission_packages}
+        packages_flatrate=packages_flatrate,
+        packages_commission=packages_commission
     )
 
 @main.route('/terms')
@@ -177,118 +105,31 @@ def get_packages():
         logger.error(f"Error fetching packages: {e}")
         return jsonify({'error': 'Failed to fetch packages'}), 500
 
-@main.route('/register', methods=['GET'])
+@main.route('/register')
 def register():
     """Registration page with package pre-selection"""
-    from app.models.client_package import ClientPackage, ClientType, COMMISSION_BASED_PACKAGES, REVISED_FLAT_RATE_PACKAGES
-    
-    # Get the selected package from query parameters
     package_param = request.args.get('package')
     selected_package = None
-    
+    from app.models.client_package import ClientPackage, ClientType
     if package_param:
-        # First check if it's a commission-based package
-        if package_param in COMMISSION_BASED_PACKAGES:
-            selected_package = {
-                'id': package_param,
-                'type': 'commission',
-                'name': COMMISSION_BASED_PACKAGES[package_param].get('name', ''),
-                'slug': package_param,
-                'description': COMMISSION_BASED_PACKAGES[package_param].get('description', '')
-            }
-        else:
-            # Try to find a flat-rate package by slug
-            flat_rate_packages = ClientPackage.query.filter(ClientPackage.client_type == ClientType.FLAT_RATE).all()
-            
-            # First try exact match with package_param as slug
-            for pkg in flat_rate_packages:
-                if hasattr(pkg, 'slug') and pkg.slug == package_param:
-                    selected_package = {
-                        'id': pkg.id,
-                        'type': 'flat_rate',
-                        'name': pkg.name,
-                        'slug': pkg.slug,
-                        'description': pkg.description
-                    }
-                    break
-            
-            # If no exact match, try to match the start of package keys in REVISED_FLAT_RATE_PACKAGES
+        try:
+            # Try as integer ID first
+            selected_package = ClientPackage.query.get(int(package_param))
+        except (ValueError, TypeError):
+            # Try as slug (for flat-rate plans)
+            selected_package = ClientPackage.query.filter(
+                ClientPackage.client_type == ClientType.FLAT_RATE
+            ).all()
+            # Find the package whose .slug property matches the param
+            selected_package = next((p for p in selected_package if p.slug == package_param), None)
             if not selected_package:
-                for full_key, pkg_data in REVISED_FLAT_RATE_PACKAGES.items():
-                    if full_key.startswith(package_param):
-                        pkg_name = pkg_data['name']
-                        for pkg in flat_rate_packages:
-                            if pkg.name.lower() == pkg_name.lower():
-                                selected_package = {
-                                    'id': pkg.id,
-                                    'type': 'flat_rate',
-                                    'name': pkg.name,
-                                    'slug': pkg.slug,
-                                    'description': pkg.description
-                                }
-                                break
-                        if selected_package:
-                            break
-    
-    # If we have a selected package, store its ID and type in the session
+                flash('Invalid package selection', 'error')
+    form = ClientRegistrationForm()
     if selected_package:
-        session['selected_package'] = {
-            'id': selected_package['id'],
-            'type': selected_package['type']
-        }
-    
-    # Get all flat-rate packages for the form
-    flat_rate_packages = ClientPackage.query.filter_by(client_type=ClientType.FLAT_RATE).all()
-    
-    # Prepare package data for the template
-    packages = {
-        'flat_rate': [{
-            'id': pkg.id,
-            'name': pkg.name,
-            'slug': pkg.slug if hasattr(pkg, 'slug') else pkg.name.lower().replace(' ', '_'),
-            'description': pkg.description,
-            'monthly_price': pkg.monthly_price,
-            'is_popular': pkg.is_popular if hasattr(pkg, 'is_popular') else False
-        } for pkg in flat_rate_packages],
-        'commission': [{
-            'id': slug,
-            'name': data.get('name', ''),
-            'slug': slug,
-            'description': data.get('description', ''),
-            'commission_rate': data.get('commission_rate', 0),
-            'is_popular': data.get('is_popular', False)
-        } for slug, data in COMMISSION_BASED_PACKAGES.items()]
-    }
-    
-    # Set the default package type based on the selected package or default to 'flat_rate'
-    default_package_type = selected_package['type'] if selected_package else 'flat_rate'
-    
-    # If we have a selected package, ensure it exists in the packages list
-    if selected_package:
-        package_exists = any(
-            pkg['id'] == selected_package['id'] and 
-            pkg.get('slug') == selected_package.get('slug')
-            for pkg in packages[selected_package['type']]
-        )
-        
-        if not package_exists:
-            # If the selected package isn't in the list, add it
-            packages[selected_package['type']].append({
-                'id': selected_package['id'],
-                'name': selected_package['name'],
-                'slug': selected_package.get('slug', ''),
-                'description': selected_package.get('description', ''),
-                'monthly_price': selected_package.get('monthly_price', 0),
-                'is_popular': selected_package.get('is_popular', False)
-            })
-    
-    return render_template(
-        'auth/register.html',
-        packages=packages,
-        selected_package_id=selected_package['id'] if selected_package else None,
-        default_package_type=default_package_type,
-        form=ClientRegistrationForm()
-    )
+        form.package_id.data = str(selected_package.id)
+    return render_template('auth/register.html', 
+                     form=form, 
+                     selected_package=selected_package)
 
 @main.route('/register', methods=['POST'])
 def register_post():

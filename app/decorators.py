@@ -401,21 +401,31 @@ def secure_admin_required(f):
         # Check if user is an admin through session or user model
         is_admin = False
         
-        # Check session admin flag (set during admin login)
-        if session.get('is_admin'):
-            is_admin = True
+        # Enhanced admin check with detailed logging
+        current_app.logger.debug(f"[ADMIN CHECK] Checking admin status for user: {current_user.id} ({type(current_user).__name__})")
         
-        # Double-check with user model if it has admin capabilities
-        if hasattr(current_user, 'is_admin') and callable(getattr(current_user, 'is_admin')):
-            if current_user.is_admin():
-                is_admin = True
-        elif hasattr(current_user, 'is_admin') and current_user.is_admin:
-            is_admin = True
-        
-        # Check if user is AdminUser type (for dual user system)
-        from app.models import AdminUser
+        # Check if user is AdminUser type (primary check)
+        from app.models.admin import AdminUser
         if isinstance(current_user, AdminUser):
+            current_app.logger.debug("[ADMIN CHECK] User is AdminUser instance")
             is_admin = True
+        
+        # Check session admin flag (secondary check)
+        elif session.get('is_admin'):
+            current_app.logger.debug("[ADMIN CHECK] User has is_admin session flag")
+            is_admin = True
+        
+        # Check for is_admin property/method (for backward compatibility)
+        elif hasattr(current_user, 'is_admin'):
+            if callable(getattr(current_user, 'is_admin')):
+                if current_user.is_admin():
+                    current_app.logger.debug("[ADMIN CHECK] User has is_admin() method that returned True")
+                    is_admin = True
+            elif current_user.is_admin:
+                current_app.logger.debug("[ADMIN CHECK] User has is_admin property that is True")
+                is_admin = True
+        
+        current_app.logger.debug(f"[ADMIN CHECK] Final admin status: {is_admin}")
             
         if not is_admin:
             # Log potential attack attempt

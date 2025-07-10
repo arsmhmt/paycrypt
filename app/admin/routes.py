@@ -1,7 +1,14 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify, send_from_directory, current_app, session, Response, make_response
+from app.decorators import admin_login_required
 
 # Create admin blueprint
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin120724')
+
+# Test route to verify admin blueprint is working
+@admin_bp.route('/test')
+@admin_login_required
+def test_route():
+    return jsonify({"status": "success", "message": "Admin blueprint is working!"})
 from flask_login import login_required, current_user, login_user, logout_user, confirm_login
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity, verify_jwt_in_request
 from sqlalchemy import func, asc, desc
@@ -28,8 +35,15 @@ from app.forms import (ClientForm, LoginForm, NotificationPreferenceForm,
                        ReportForm, SettingForm, PricingPlanForm, PricingPlanFilterForm)
 from app.decorators import admin_required, admin_login_required, secure_admin_required
 from werkzeug.security import generate_password_hash, check_password_hash
+
+@admin_bp.before_request
+def log_request_info():
+    current_app.logger.debug(f"[ADMIN] Incoming request: {request.method} {request.path}")
+    current_app.logger.debug(f"[ADMIN] Request endpoint: {request.endpoint}")
+    current_app.logger.debug(f"[ADMIN] URL rule: {request.url_rule}" if request.url_rule else "[ADMIN] No URL rule matched")
 from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
+import datetime as dt
 import os
 import secrets
 import string
@@ -98,162 +112,69 @@ def is_safe_url(target):
     return test_url.scheme in ('http', 'https') and ref_url.netloc == test_url.netloc
 
 @admin_bp.route('/login', methods=['GET', 'POST'])
-@rate_limit('admin_login', limit=5, window=300)  # 5 attempts per 5 minutes per IP
+@rate_limit('admin_login', limit=60, window=300)  # 60 attempts per 5 minutes per IP
 def admin_login():
-    # Debug logging
+    """Handle admin login with both form and JSON API support"""
     current_app.logger.debug("Admin login route accessed")
-    current_app.logger.debug(f"Request method: {request.method}")
-    current_app.logger.debug(f"Next URL: {request.args.get('next')}")
     
     # Handle already authenticated users
     if current_user.is_authenticated and hasattr(current_user, 'is_admin') and current_user.is_admin:
-        next_page = request.args.get('next')
+        next_page = request.args.get('next') or url_for('admin.admin_dashboard')
         current_app.logger.info(f"User already authenticated: {current_user.username}")
-        return jsonify({
-            'success': True,
-            'redirect_url': next_page or url_for('admin.admin_dashboard')
-        })
+        if request.accept_mimetypes.accept_json:
+            return jsonify({
+                'success': True,
+                'redirect_url': next_page
+            })
+        return redirect(next_page)
     
     # Handle POST request (form submission)
     if request.method == 'POST':
         current_app.logger.debug("Login form submitted")
-        current_app.logger.debug(f"Form data: {request.form}")
         
-        # Get form data
-        username = request.form.get('username')
-        password = request.form.get('password')
+        # Get form data - support both form data and JSON
+        data = request.get_json(silent=True) or request.form
+        username = data.get('username')
+        password = data.get('password')
         
-        # Log the exact values received (except password)
-        current_app.logger.debug(f"[AUTH] Request form data: {dict(request.form)}")
-        current_app.logger.debug(f"[AUTH] Request JSON: {request.get_json(silent=True)}")
-        current_app.logger.debug(f"[AUTH] Request content type: {request.content_type}")
-        current_app.logger.debug(f"[AUTH] Request headers: {dict(request.headers)}")
-        current_app.logger.debug(f"[AUTH] Received username: {username}")
-        current_app.logger.debug(f"[AUTH] Received password length: {len(password) if password else 0}")
-        current_app.logger.debug(f"[AUTH] Request form data keys: {list(request.form.keys())}")
-        current_app.logger.debug(f"[AUTH] Request method: {request.method}")
+        # Log minimal debug info (don't log passwords)
+        current_app.logger.debug(f"Login attempt for username: {username}")
         
-        current_app.logger.debug(f"Username: {username}")
-        current_app.logger.debug("Password received (not logged for security)")
-        
+        # Validate input
         if not username or not password:
-            flash('Username and password are required', 'error')
-            current_app.logger.warning("Missing credentials")
-            return render_template('admin/login.html', error='Username and password are required')
-        
-        # Find admin user by username
-        admin = AdminUser.query.filter_by(username=username).first()
-        
-        if admin:
-            current_app.logger.debug(f"[AUTH] Admin user found by username: {admin.username}")
-            current_app.logger.debug(f"[AUTH] Password hash: {admin.password_hash[:10]}...")
-            current_app.logger.debug(f"[AUTH] Is active: {admin.is_active}")
-        else:
-            # Try finding by email as well for better error reporting
-            admin = AdminUser.query.filter_by(email=username).first()
-            if admin:
-                current_app.logger.debug(f"[AUTH] Admin user found by email: {admin.email}")
-                current_app.logger.debug(f"[AUTH] Username for this email: {admin.username}")
-            else:
-                current_app.logger.warning(f"[AUTH] No admin found with username/email: {username}")
-                # Log failed login attempt
-                log_security_event(
-                    event_type='failed_login',
-                    details={
-                        'description': f'Admin login failed - user not found: {username}',
-                        'user_agent': request.user_agent.string,
-                        'severity': 'medium'
-                    },
-                    user_id=None,
-                    ip_address=request.remote_addr or '127.0.0.1'
-                )
-                abuse_protection.track_failed_attempt(request.remote_addr or '127.0.0.1', 'admin_login')
-                flash('Invalid username or password', 'error')
-                return redirect(url_for('admin.admin_login', next=request.args.get('next')))
-        
-        # Check password
-        password_correct = admin.check_password(password)
-        current_app.logger.debug(f"[AUTH] Password check result: {password_correct}")
-        
-        if admin and password_correct:
-            current_app.logger.debug(f"[LOGIN] Password check passed for user: {admin.username}")
-            current_app.logger.debug(f"[LOGIN] Password hash: {admin.password_hash[:10]}...")  # Log first 10 chars for debugging
-            
-            if not admin.is_active:
-                current_app.logger.warning(f"[LOGIN] Account is deactivated: {admin.username}")
-                return jsonify({
-                    'success': False,
-                    'error': 'This admin account has been deactivated'
-                }), 403
-            
-            # Log in the admin user with remember=True
-            login_result = login_user(admin, remember=True)
-            current_app.logger.debug(f"[LOGIN] login_user() result: {login_result}")
-            
-            # Verify login state
-            current_app.logger.debug(f"[LOGIN] User: {admin.username}")
-            current_app.logger.debug(f"[LOGIN] Authenticated: {current_user.is_authenticated}")
-            current_app.logger.debug(f"[LOGIN] User ID: {current_user.get_id() if hasattr(current_user, 'get_id') else None}")
-            current_app.logger.debug(f"[LOGIN] User ID (direct): {current_user.id if hasattr(current_user, 'id') else None}")
-            
-            # Set session variable to indicate admin login
-            session['is_admin'] = True
-            current_app.logger.debug("[LOGIN] Session variable set")
-            
-            # Log successful login
-            log_security_event(
-                event_type='successful_login',
-                details={
-                    'description': f'Admin {admin.username} logged in successfully',
-                    'user_agent': request.user_agent.string,
-                    'severity': 'low'
-                },
-                user_id=admin.id,
-                ip_address=request.remote_addr or '127.0.0.1'
-            )
-            abuse_protection.clear_attempts(request.remote_addr or '127.0.0.1', 'admin_login')
-            
-            # Verify session
-            current_app.logger.debug(f"[LOGIN] Session contents: {dict(session)}")
-            
-            # Determine the next page
-            next_page = request.args.get('next') or request.form.get('next')
-            # If not safe or empty, redirect to dashboard
-            if not next_page or not is_safe_url(next_page) or next_page == url_for('admin.admin_login'):
-                next_page = url_for('admin.admin_dashboard')
-                
-            # Check if the request wants JSON response
-            current_app.logger.debug(f"[LOGIN] Login successful for user: {username}")
-            current_app.logger.debug(f"[LOGIN] Next page: {next_page}")
-            current_app.logger.debug(f"[LOGIN] Request accepts JSON: {request.accept_mimetypes.accept_json}")
-            
+            error_msg = 'Username and password are required'
             if request.accept_mimetypes.accept_json:
-                response = jsonify({
-                    'success': True,
-                    'redirect_url': next_page
-                })
-                current_app.logger.debug(f"[LOGIN] Sending JSON response: {response.get_data(as_text=True)}")
-                return response
-                
-            current_app.logger.debug("[LOGIN] Redirecting to:", next_page)
-            return redirect(next_page)
-            
-        else:
-            error_msg = f"[LOGIN] Login failed for username: {username}"
-            current_app.logger.warning(error_msg)
+                return jsonify({'success': False, 'error': error_msg}), 400
+            flash(error_msg, 'error')
+            return redirect(url_for('admin.admin_login'))
+        
+        # Find admin user by username or email
+        admin = AdminUser.query.filter(
+            (AdminUser.username == username) | 
+            (AdminUser.email == username)
+        ).first()
+        
+        # Check credentials
+        if not admin or not admin.check_password(password):
+            error_msg = 'Invalid username or password'
+            current_app.logger.warning(f"Failed login attempt for username: {username}")
             
             # Log failed login attempt
             log_security_event(
                 event_type='failed_login',
                 details={
-                    'description': f'Admin login failed - invalid password for user: {username}',
+                    'description': f'Admin login failed - invalid credentials for: {username}',
                     'user_agent': request.user_agent.string,
                     'severity': 'medium'
                 },
                 user_id=admin.id if admin else None,
                 ip_address=request.remote_addr or '127.0.0.1'
             )
+            
+            # Track failed attempt for rate limiting
             abuse_protection.track_failed_attempt(request.remote_addr or '127.0.0.1', 'admin_login')
+            
+            # Check if IP is blocked
             if abuse_protection.is_blocked(request.remote_addr or '127.0.0.1', 'admin_login'):
                 log_security_event(
                     event_type='ip_blocked',
@@ -265,19 +186,69 @@ def admin_login():
                     user_id=None,
                     ip_address=request.remote_addr or '127.0.0.1'
                 )
-                return jsonify({
-                    'success': False,
-                    'error': 'Too many failed attempts. Please try again later.'
-                }), 429
+                if request.accept_mimetypes.accept_json:
+                    return jsonify({
+                        'success': False,
+                        'error': 'Too many failed attempts. Please try again later.'
+                    }), 429
+                flash('Too many failed attempts. Please try again later.', 'error')
+                return redirect(url_for('admin.admin_login'))
             
             if request.accept_mimetypes.accept_json:
                 return jsonify({
                     'success': False,
-                    'error': 'Invalid username or password'
+                    'error': error_msg
                 }), 401
                 
-            flash('Invalid username or password', 'error')
-            return redirect(url_for('admin.admin_login', next=request.args.get('next')))
+            flash(error_msg, 'error')
+            return redirect(url_for('admin.admin_login'))
+        
+        # Check if account is active
+        if not admin.is_active:
+            error_msg = 'This admin account has been deactivated'
+            current_app.logger.warning(f"Login attempt for deactivated account: {username}")
+            
+            if request.accept_mimetypes.accept_json:
+                return jsonify({
+                    'success': False,
+                    'error': error_msg
+                }), 403
+                
+            flash(error_msg, 'error')
+            return redirect(url_for('admin.admin_login'))
+        
+        # Login successful - set up session and login user
+        login_user(admin, remember=True)
+        session['is_admin'] = True
+        session['_user_type'] = 'admin'
+        
+        # Log successful login
+        log_security_event(
+            event_type='successful_login',
+            details={
+                'description': f'Admin {admin.username} logged in successfully',
+                'user_agent': request.user_agent.string,
+                'severity': 'low'
+            },
+            user_id=admin.id,
+            ip_address=request.remote_addr or '127.0.0.1'
+        )
+        
+        # Clear any previous failed attempts for this IP
+        abuse_protection.clear_attempts(request.remote_addr or '127.0.0.1', 'admin_login')
+        
+        # Determine redirect URL
+        next_page = request.args.get('next') or url_for('admin.admin_dashboard')
+        
+        # Handle JSON response
+        if request.accept_mimetypes.accept_json:
+            return jsonify({
+                'success': True,
+                'redirect_url': next_page
+            })
+        
+        # Handle HTML response
+        return redirect(next_page)
     
     # Handle GET request (show login form)
     return render_template('admin/login.html', next=request.args.get('next', ''))
@@ -448,7 +419,7 @@ def delete_pricing_plan(plan_id):
 
 @admin_bp.route('/dashboard')
 @rate_limit('admin_dashboard', limit=60, window=300)  # 60 requests per 5 minutes
-@secure_admin_required
+@admin_login_required
 def admin_dashboard():
     # Log current user state
     current_app.logger.debug(f"[DASHBOARD] User: {current_user.username}")
@@ -456,10 +427,102 @@ def admin_dashboard():
     current_app.logger.debug(f"[DASHBOARD] Admin: {hasattr(current_user, 'is_admin') and current_user.is_admin}")
     current_app.logger.debug(f"[DASHBOARD] Session contents: {dict(session)}")
     
-    # Add dashboard statistics and data here
-    from app.models import WithdrawalRequest
-    pending_withdrawals_count = WithdrawalRequest.query.filter_by(status='pending').count()
-    return render_template('admin/dashboard.html', pending_withdrawals_count=pending_withdrawals_count)
+    # Import models with proper handling to avoid circular imports
+    from app.models.client import Client
+    from app.models.payment import Payment
+    from app.models.withdrawal import WithdrawalRequest
+    from app.models.admin import AdminUser
+    from app.models.audit import AuditTrail
+    from app.models.transaction import Transaction
+    from app.models.client_wallet import ClientWallet as Wallet
+    from app.models.support_ticket import SupportTicket
+    from app.models.notification import Notification
+    
+    # Initialize default values for recent_activity and top_clients
+    recent_activity = []
+    top_clients = []
+    
+    try:
+        # Get recent activity (last 10 transactions with client info)
+        recent_activity = db.session.query(
+            Transaction,
+            Client
+        ).join(
+            Client, Transaction.client_id == Client.id
+        ).order_by(
+            Transaction.created_at.desc()
+        ).limit(10).all()
+        
+        # Get top 5 clients by transaction volume
+        top_clients = db.session.query(
+            Client,
+            db.func.count(Transaction.id).label('transaction_count'),
+            db.func.sum(Transaction.amount).label('total_volume')
+        ).join(
+            Transaction, Client.id == Transaction.client_id
+        ).group_by(
+            Client.id
+        ).order_by(
+            db.desc('total_volume')
+        ).limit(5).all()
+    except Exception as e:
+        current_app.logger.error(f"Error fetching dashboard data: {str(e)}")
+    
+    # Prepare system stats with error handling
+    pending_withdrawals_count = 0
+    try:
+        pending_withdrawals_count = WithdrawalRequest.query.filter_by(status='pending').count()
+    except Exception as e:
+        current_app.logger.error(f"Error counting pending withdrawals: {str(e)}")
+    
+    # Initialize stats dictionary with default values
+    stats = {
+        'total_clients': 0,
+        'total_transactions': 0,
+        'pending_withdrawals': pending_withdrawals_count,
+        'pending_user_withdrawals': 0,
+        'pending_client_withdrawals': 0,
+        'custom_wallets': 0,
+        'pending_tickets': 0
+    }
+    
+    try:
+        # Update stats with actual values
+        stats.update({
+            'total_clients': Client.query.count(),
+            'total_transactions': Transaction.query.count(),
+            'pending_user_withdrawals': WithdrawalRequest.query.filter_by(
+                status='pending',
+                withdrawal_type='user'
+            ).count(),
+            'pending_client_withdrawals': WithdrawalRequest.query.filter_by(
+                status='pending',
+                withdrawal_type='client'
+            ).count(),
+            'custom_wallets': Client.query.filter(Client.wallet_address.isnot(None)).count()
+        })
+    except Exception as e:
+        current_app.logger.error(f"Error calculating system stats: {str(e)}")
+    
+    # Log the dashboard access
+    current_app.logger.info(f"Admin dashboard accessed by {current_user.username}")
+    
+    # For backward compatibility, also pass the stats as individual variables
+    return render_template(
+        'admin/dashboard.html',
+        recent_activity=recent_activity,
+        top_clients=top_clients,
+        stats=stats,  # Pass stats as a single dictionary
+        # Also pass individual variables for backward compatibility
+        total_clients=stats['total_clients'],
+        total_transactions=stats['total_transactions'],
+        pending_withdrawals=stats['pending_withdrawals'],
+        pending_user_withdrawals=stats['pending_user_withdrawals'],
+        pending_client_withdrawals=stats['pending_client_withdrawals'],
+        custom_wallets=stats['custom_wallets'],
+        pending_tickets=stats['pending_tickets'],
+        current_time=datetime.utcnow()  # Pass current time directly
+    )
 
 @admin_bp.route('/analytics')
 @secure_admin_required

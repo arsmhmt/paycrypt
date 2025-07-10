@@ -16,8 +16,6 @@ class User(BaseModel, UserMixin):
     email = db.Column(db.String(120), unique=True, nullable=False)
 
     password_hash = db.Column(db.String(128))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Relationships
     client = db.relationship('Client', back_populates='user', uselist=False)
@@ -61,6 +59,12 @@ class User(BaseModel, UserMixin):
     def is_admin(self):
         """Check if this user is an admin (not a client)"""
         return self.client is None
+        
+    def has_permission(self, permission_name):
+        """Check if the user has a specific permission.
+        Regular users don't have any admin permissions.
+        """
+        return False
     
     def __repr__(self):
         return f'<User {self.username}>'

@@ -60,7 +60,8 @@ from .role import Role
 from .support_ticket import SupportTicket
 
 # Import package-related models
-from .client_package import ClientPackage, Feature, PackageFeature, ClientSubscription, ClientType
+from .feature import Feature
+from .client_package import ClientPackage, PackageFeature, ClientSubscription, ClientType
 from .package_payment import PackageActivationPayment, FlatRateSubscriptionPayment, SubscriptionBillingCycle, SubscriptionStatus
 from .setting import Setting
 

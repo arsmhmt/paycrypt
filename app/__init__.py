@@ -121,15 +121,6 @@ def create_app(config_class=None):
     with app.app_context():
         # Import models to register them with SQLAlchemy
         from . import models  # noqa: F401
-        # Register Flask-Login user_loader
-        from app.models.user import User
-        from app.extensions.extensions import login_manager
-        @login_manager.user_loader
-        def load_user(user_id):
-            try:
-                return User.query.get(int(user_id))
-            except Exception:
-                return None
         
         # Set up model relationships after all models are loaded
         if hasattr(models, 'payment') and hasattr(models, 'recurring_payment'):
@@ -276,6 +267,13 @@ def create_app(config_class=None):
         app.register_blueprint(client_bp, url_prefix='/client')
         app.register_blueprint(api_bp, url_prefix='/api')
         app.register_blueprint(package_payment, url_prefix='/package_payment')
+
+        # Log all registered routes for debugging
+        app.logger.info("\n=== Registered Routes ===")
+        for rule in sorted(app.url_map.iter_rules(), key=lambda r: r.rule):
+            methods = ','.join(sorted(rule.methods - {'OPTIONS', 'HEAD'}))
+            app.logger.info(f"{rule.endpoint:50} {rule.rule:60} {methods}")
+        app.logger.info("========================\n")
 
         app.logger.info("Blueprints registered successfully")
         

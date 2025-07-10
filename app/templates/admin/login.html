@@ -78,8 +78,7 @@
             <div class="alert alert-danger">{{ error }}</div>
             {% endif %}
 
-            <form id="loginForm" method="POST" action="{{ url_for('admin.admin_login') }}" class="needs-validation"
-                novalidate>
+            <form id="loginForm" method="POST" action="{{ url_for('admin.admin_login') }}" class="needs-validation" novalidate>
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
                 <div class="mb-3">
@@ -178,7 +177,7 @@
                             // Handle successful login
                             if (response.ok && result.success) {
                                 console.log('Login successful, redirecting to:', result.redirect);
-                                window.location.href = result.redirect || '{{ url_for("admin.dashboard") }}';
+                                window.location.href = result.redirect || '{{ url_for("admin.admin_dashboard") }}';
                             } else {
                                 // Handle login error
                                 const errorMsg = result.error || '{{ _("Login failed. Please check your credentials.") }}';

@@ -30,18 +30,7 @@ cache = Cache()
 scheduler = APScheduler()
 login_manager = LoginManager()
 
-# Register Flask-Login user_loader globally
-try:
-    from app.models.user import User
-    @login_manager.user_loader
-    def load_user(user_id):
-        try:
-            return User.query.get(int(user_id))
-        except Exception:
-            return None
-except ImportError:
-    # User model may not be available at import time; will be registered in app context
-    pass
+# User loader will be registered in init_app to avoid circular imports
 csrf = CSRFProtect()
 babel = Babel()
 
@@ -62,6 +51,31 @@ def init_app(app_):
     
     # Store the app instance
     app = app_
+    
+    # Configure the user_loader after the app context is available
+    @login_manager.user_loader
+    def load_user(user_id):
+        try:
+            from app.models.admin import AdminUser
+            from app.models.user import User
+            
+            # First try to load as AdminUser
+            admin = AdminUser.query.get(int(user_id))
+            if admin:
+                app_.logger.debug(f"[AUTH] Loaded admin user: {admin.username}")
+                return admin
+                
+            # If not an admin, try to load as regular User
+            user = User.query.get(int(user_id))
+            if user:
+                app_.logger.debug(f"[AUTH] Loaded regular user: {user.username}")
+            return user
+                
+        except Exception as e:
+            import traceback
+            app_.logger.error(f"Error loading user {user_id}: {e}")
+            app_.logger.error(traceback.format_exc())
+            return None
     
     # Initialize SQLAlchemy only if not already registered
     if not getattr(app, "extensions", None) or 'sqlalchemy' not in app.extensions:

@@ -15,9 +15,6 @@ class AdminUser(UserMixin, BaseModel):
     last_name = db.Column(db.String(100))
     _active = db.Column('is_active', db.Boolean, default=True)
     is_superuser = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
-    updated_at = db.Column(db.DateTime, default=db.func.current_timestamp(),
-                         onupdate=db.func.current_timestamp())
 
     def __init__(self, username, email, password, first_name=None, last_name=None, is_active=True, is_superuser=False):
         self.username = username
@@ -68,9 +65,14 @@ class AdminUser(UserMixin, BaseModel):
         return self.username
     
     @property
+    def is_admin(self):
+        # Always return True for AdminUser instances
+        return True
+        
+    @property
     def is_active(self):
         # Return True if the user is active
-        return self._active  # or self.is_active, depending on your field
+        return self._active
 
     def get_id(self):
         return str(self.id)

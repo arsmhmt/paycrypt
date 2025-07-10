@@ -8,7 +8,7 @@
     <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">{{ title }}</h1>
-        <a href="{{ url_for('user.list_users') }}" class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm">
+        <a href="{{ url_for('admin.clients') }}" class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm">
             <i class="bi bi-arrow-left"></i> Back to Users
         </a>
     </div>
@@ -115,7 +115,7 @@
                         </div>
 
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <a href="{{ url_for('user.list_users') }}" class="btn btn-secondary me-md-2">
+                            <a href="{{ url_for('admin.clients') }}" class="btn btn-secondary me-md-2">
                                 <i class="bi bi-x-lg"></i> Cancel
                             </a>
                             <button type="submit" class="btn btn-primary">
