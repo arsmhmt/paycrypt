@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from decimal import Decimal
-from app import db 
+from app.extensions.extensions import db 
 from .base import BaseModel
 from .enums import PaymentStatus
 from sqlalchemy.orm import relationship

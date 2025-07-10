@@ -13,16 +13,9 @@ class Config:
     MAIL_PORT = 587
     MAIL_USE_TLS = True
     MAIL_USE_SSL = False
-    MAIL_USERNAME = 'paycryptonline@proton.me'  # Set your ProtonMail username
+    MAIL_USERNAME = 'paycryptonline@proton.me'
     import os
-    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', '')  # Set your mail password in environment variable MAIL_PASSWORD
-
-    # Usage for developers:
-    # To use this configuration, set the MAIL_PASSWORD environment variable before running the application.
-    # For example, on Linux or macOS, you can run the following command:
-    # export MAIL_PASSWORD='your_mail_password'
-    # On Windows, you can run the following command:
-    # set MAIL_PASSWORD='your_mail_password'
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', '')
 
     # Babel Configuration
     LANGUAGES = {
@@ -32,7 +25,48 @@ class Config:
     }
     BABEL_DEFAULT_LOCALE = 'en'
     BABEL_DEFAULT_TIMEZONE = 'UTC'
-    # ... other config ...
+
+    # Coin Configuration
+    COIN_LIST = [
+        'BTC', 'ETH', 'USDT', 'USDC', 'BNB', 'XRP', 'SOL', 'DOGE', 'TRX',
+        'ADA', 'LTC', 'AVAX', 'MATIC', 'SHIB', 'DOT',  # First 15 (Starter)
+        'LINK', 'XLM', 'DAI', 'ARB', 'OP',             # Next 5 (Business)
+        'TON', 'CRO', 'FTM', 'APE', 'BCH'              # All 25 (Enterprise)
+    ]
+
+    PACKAGE_COIN_LIMITS = {
+        'starter_flat_rate': 15,
+        'business_flat_rate': 20,
+        'enterprise_flat_rate': 25
+    }
+
+    COIN_DISPLAY_NAMES = {
+        'BTC': 'Bitcoin',
+        'ETH': 'Ethereum',
+        'USDT': 'Tether',
+        'USDC': 'USD Coin',
+        'BNB': 'Binance Coin',
+        'XRP': 'Ripple',
+        'SOL': 'Solana',
+        'DOGE': 'Dogecoin',
+        'TRX': 'TRON',
+        'ADA': 'Cardano',
+        'LTC': 'Litecoin',
+        'AVAX': 'Avalanche',
+        'MATIC': 'Polygon',
+        'SHIB': 'Shiba Inu',
+        'DOT': 'Polkadot',
+        'LINK': 'Chainlink',
+        'XLM': 'Stellar',
+        'DAI': 'Dai',
+        'ARB': 'Arbitrum',
+        'OP': 'Optimism',
+        'TON': 'Toncoin',
+        'CRO': 'Cronos',
+        'FTM': 'Fantom',
+        'APE': 'ApeCoin',
+        'BCH': 'Bitcoin Cash'
+    }
 
 class DevelopmentConfig(Config):
     DEBUG = True

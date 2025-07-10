@@ -5,10 +5,13 @@ from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash
 from werkzeug.exceptions import Unauthorized
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, g, has_request_context
 from flask_cors import CORS
 from apscheduler.schedulers.background import BackgroundScheduler
 from flask_babel import _
+
+# Import context processors
+from .context_processors import inject_coin_utils
 
 # Import extensions from the central extensions module
 from .extensions.extensions import init_app as init_extensions, db
@@ -252,19 +255,22 @@ def create_app(config_class=None):
 
     app.logger.debug("[LOGIN_MANAGER] Login manager configured")
     
+    # Register context processors
+    app.context_processor(inject_coin_utils)
+    
     # Import and register blueprints with proper error handling
     try:
         from .auth_routes import bp as auth_bp
         from .main_routes import main
-        from .admin.routes import admin_bp  # Only use the secure admin blueprint
+        from .admin.routes import admin_bp
         from .admin.withdrawal_routes import withdrawal_bp
         from .client_routes import client_bp
         from .api import api_bp
         from .package_payment_routes import package_payment
-
+        
         # Register blueprints
-        app.register_blueprint(main)
         app.register_blueprint(auth_bp, url_prefix='/auth')
+        app.register_blueprint(main)
         app.register_blueprint(admin_bp)  # Secure admin path only
         app.register_blueprint(withdrawal_bp)
         app.register_blueprint(client_bp, url_prefix='/client')
@@ -408,19 +414,9 @@ def create_app(config_class=None):
             app.logger.info("Background scheduler started successfully")
         except Exception as e:
             app.logger.error(f"Scheduler failed to start: {e}", exc_info=True)
-            if os.getenv('FLASK_ENV') == 'production':
-                raise  # In production, we want to fail fast
-
+    
     # Register CLI commands
     try:
-        # Register database commands first (DISABLED: db_commands.py is corrupted)
-        # from .commands.db_commands import init_app as init_db_commands
-        # init_db_commands(app)
-        
-        # Register other CLI commands
-        from .commands.reset_usage import init_app as init_cli_commands
-        init_cli_commands(app)
-        
         # Register usage alert commands
         from .services.usage_alerts import create_usage_alert_commands
         create_usage_alert_commands(app)
@@ -428,6 +424,34 @@ def create_app(config_class=None):
         # Register admin CLI commands
         from .commands.admin_cli import register_admin_commands
         register_admin_commands(app)
+        
+        # Add project root to Python path
+        import sys
+        from pathlib import Path
+        project_root = str(Path(__file__).parent.parent)
+        if project_root not in sys.path:
+            sys.path.append(project_root)
+        
+        # Register coin management commands
+        try:
+            from scripts.manage_coins import register_commands as register_coin_commands
+            register_coin_commands(app)
+        except ImportError as e:
+            app.logger.warning(f"Could not register coin management commands: {e}")
+        
+        # Register package management commands
+        try:
+            from scripts.manage_packages import package as package_commands
+            app.cli.add_command(package_commands, name="package")
+        except ImportError as e:
+            app.logger.warning(f"Could not register package management commands: {e}")
+        
+        # Register test commands
+        try:
+            from scripts.test_package_management import register_commands as register_test_commands
+            register_test_commands(app)
+        except ImportError as e:
+            app.logger.warning(f"Could not register test commands: {e}")
         
         # Initialize migrations - temporarily disabled to fix migration issues
         # from flask_migrate import upgrade

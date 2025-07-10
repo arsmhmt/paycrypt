@@ -19,9 +19,7 @@ def setup_database():
             user = User(
                 username='testuser',
                 email='test@example.com',
-                password_hash=generate_password_hash('Test123!'),
-                is_active=True,
-                is_verified=True
+                password_hash=generate_password_hash('Test123!')
             )
             db.session.add(user)
             db.session.flush()
@@ -29,6 +27,7 @@ def setup_database():
             client = Client(
                 user_id=user.id,
                 company_name='Test Company',
+                email='test@example.com',  # Required field
                 contact_person='Test User',
                 contact_email='test@example.com',
                 contact_phone='+1234567890',

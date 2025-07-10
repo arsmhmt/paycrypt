@@ -297,11 +297,11 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
             {% else %}
+            {% set upgrade_pkg = get_upgrade_package_name(current_user.client.package.slug if current_user.client and current_user.client.package else '') %}
             <div class="alert alert-warning alert-dismissible fade show" role="alert">
                 <i class="fas fa-clock"></i>
-                <strong>{{ _('Static Dashboard:') }}</strong> {{ _('Upgrade to Professional for real-time monitoring.')
-                }}
-                <a href="#upgrade" class="alert-link">{{ _('Learn more') }}</a>
+                <strong>{{ _('Static Dashboard:') }}</strong> {{ _('Upgrade to %(package)s for real-time monitoring.', package=upgrade_pkg) }}
+                <a href="{{ url_for('client.pricing') if 'pricing' in get_route_names() else '#' }}" class="alert-link">{{ _('Learn more') }}</a>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
             {% endif %}

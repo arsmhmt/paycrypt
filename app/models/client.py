@@ -4,11 +4,12 @@ from decimal import Decimal
 from werkzeug.security import generate_password_hash, check_password_hash
 from .base import BaseModel
 from .enums import PaymentStatus
-from sqlalchemy import event
+from sqlalchemy import event, func, distinct
 from sqlalchemy.orm import relationship, backref
 
 # Import the feature access configuration
 from ..config.packages import FeatureAccessMixin, sync_client_status_with_package, client_has_feature
+from ..config.config import Config
 
 class Client(BaseModel, FeatureAccessMixin):
     __tablename__ = 'clients'
@@ -194,6 +195,49 @@ class Client(BaseModel, FeatureAccessMixin):
             return False
         return check_password_hash(self.password_hash, password)
 
+    @property
+    def is_locked(self):
+        """Check if the client account is locked due to too many failed login attempts."""
+        if not self.locked_at:
+            return False
+        lock_duration = datetime.utcnow() - self.locked_at
+        return lock_duration.total_seconds() < 3600  # Lock for 1 hour
+        
+    @property
+    def allowed_coins(self):
+        """Get the list of coin symbols allowed for this client's package."""
+        if not hasattr(self, 'package') or not self.package:
+            return []
+            
+        from .coin import Coin
+        coins = Coin.get_allowed_coins(self.package.slug)
+        return [coin.symbol for coin in coins]
+        
+    def is_coin_allowed(self, coin_symbol):
+        """Check if a coin is allowed for this client's package."""
+        if not coin_symbol:
+            return False
+        return coin_symbol.upper() in self.allowed_coins
+        
+    def get_coin_limit(self):
+        """Get the maximum number of coins allowed for this client's package."""
+        if not hasattr(self, 'package') or not self.package:
+            return 0
+        return Config.PACKAGE_COIN_LIMITS.get(self.package.slug, 0)
+        
+    def get_coin_usage(self):
+        """Get the number of unique coins used by this client."""
+        from .transaction import Transaction  # Import here to avoid circular imports
+        
+        # Get count of unique coins used in transactions
+        unique_coins_count = db.session.query(
+            func.count(distinct(Transaction.coin))
+        ).filter(
+            Transaction.client_id == self.id
+        ).scalar() or 0
+        
+        return unique_coins_count
+    
     def to_dict(self):
         return {
             'id': self.id,

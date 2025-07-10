@@ -1,7 +1,7 @@
 from functools import wraps
 from flask import request, jsonify, redirect, url_for, current_app, flash, abort
 from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request, get_jwt
-from app import db # <--- CRITICAL CHANGE HERE: from app import db
+from app.extensions.extensions import db
 import jwt # This is python-jwt, not Flask-JWT-Extended's internal jwt object
 from datetime import datetime
 from flask_login import current_user # Keep if Flask-Login is still used for some logic

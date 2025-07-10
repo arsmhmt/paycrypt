@@ -83,9 +83,11 @@ def init_app(app_):
     
     login_manager.init_app(app)
     csrf.init_app(app)
+    # Initialize Babel
     babel.init_app(app)
     
-    # Configure babel
+    # Configure Babel locale selector
+    @babel.localeselector
     def get_locale():
         from flask import request, session
         languages = app.config.get('LANGUAGES', {'en': 'English', 'tr': 'Türkçe', 'ru': 'Русский'})
@@ -96,8 +98,6 @@ def init_app(app_):
             session['language'] = lang
             return lang
         return request.accept_languages.best_match(languages.keys()) or 'en'
-
-    babel.locale_selector_func = get_locale
     
     # Set default languages if not configured
     if 'LANGUAGES' not in app.config:

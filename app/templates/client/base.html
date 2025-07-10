@@ -745,14 +745,15 @@
                                     <span class="nav-text">Withdrawals</span>
                                 </a>
                                 {% else %}
+                                {% set upgrade_pkg = get_upgrade_package_name(current_user.client.package.slug if current_user.client and current_user.client.package else '') %}
                                 <a class="nav-link nav-link-locked" href="#" data-bs-toggle="tooltip"
-                                    title="Upgrade to Professional to unlock payment features">
+                                    title="Upgrade to {{ upgrade_pkg }} to unlock payment features">
                                     <div class="sb-nav-link-icon"><i class="bi bi-credit-card"></i></div>
                                     <span class="nav-text">Payments</span>
                                     <div class="nav-lock"><i class="bi bi-lock-fill"></i></div>
                                 </a>
                                 <a class="nav-link nav-link-locked" href="#" data-bs-toggle="tooltip"
-                                    title="Upgrade to Professional to unlock withdrawal features">
+                                    title="Upgrade to {{ upgrade_pkg }} to unlock withdrawal features">
                                     <div class="sb-nav-link-icon"><i class="bi bi-arrow-up-circle"></i></div>
                                     <span class="nav-text">Withdrawals</span>
                                     <div class="nav-lock"><i class="bi bi-lock-fill"></i></div>
@@ -847,15 +848,16 @@
                                     <span>Developer</span>
                                 </div>
 
+                                {% set upgrade_pkg = get_upgrade_package_name(current_user.client.package.slug if current_user.client and current_user.client.package else '') %}
                                 <a class="nav-link nav-link-locked" href="#" data-bs-toggle="tooltip"
-                                    title="Upgrade to Professional or higher to access API management">
+                                    title="Upgrade to {{ upgrade_pkg }} or higher to access API management">
                                     <div class="sb-nav-link-icon"><i class="fas fa-key"></i></div>
                                     <span class="nav-text">API Keys</span>
                                     <div class="nav-lock"><i class="bi bi-lock-fill"></i></div>
                                 </a>
 
                                 <a class="nav-link nav-link-locked" href="#" data-bs-toggle="tooltip"
-                                    title="Upgrade to Professional or higher to access API documentation">
+                                    title="Upgrade to {{ upgrade_pkg }} or higher to access API documentation">
                                     <div class="sb-nav-link-icon"><i class="fas fa-book"></i></div>
                                     <span class="nav-text">API Documentation</span>
                                     <div class="nav-lock"><i class="bi bi-lock-fill"></i></div>

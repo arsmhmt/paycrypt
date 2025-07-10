@@ -7,8 +7,10 @@ from app.extensions import db
 from app.models.client_package import Feature, ClientPackage, PackageFeature, ClientType, PackageStatus
 
 
-def init_features():
+def init_features(session):
     """Initialize core features"""
+    from app.models.feature import Feature
+    
     features = [
         # Dashboard Features
         {'name': 'Basic Dashboard', 'feature_key': 'dashboard_basic', 'category': 'dashboard', 'description': 'Basic payment tracking and statistics'},
@@ -41,18 +43,22 @@ def init_features():
         {'name': 'Compliance Tools', 'feature_key': 'compliance_tools', 'category': 'compliance', 'description': 'KYC/AML compliance tools', 'is_premium': True},
     ]
     
+    created_count = 0
     for feature_data in features:
-        feature = Feature.query.filter_by(feature_key=feature_data['feature_key']).first()
+        feature = session.query(Feature).filter_by(feature_key=feature_data['feature_key']).first()
         if not feature:
             feature = Feature(**feature_data)
-            db.session.add(feature)
+            session.add(feature)
+            created_count += 1
     
-    db.session.commit()
-    print("✓ Features initialized")
+    print(f"✓ Initialized {created_count} features")
+    return created_count
 
 
-def init_packages():
+def init_packages(session):
     """Initialize default packages"""
+    from app.models.client_package import ClientPackage, PackageFeature, ClientType
+    from app.models.feature import Feature
     
     # Commission-based packages (Type 1 - Uses platform wallet)
     commission_packages = [
@@ -158,45 +164,57 @@ def init_packages():
     ]
     
     all_packages = commission_packages + flat_rate_packages
+    created_count = 0
     
     for package_data in all_packages:
-        package = ClientPackage.query.filter_by(name=package_data['name']).first()
+        package = session.query(ClientPackage).filter_by(name=package_data['name']).first()
         if not package:
             # Extract features list
             feature_keys = package_data.pop('features')
             
+            # Calculate annual price with 10% discount for flat-rate packages
+            if package_data.get('monthly_price'):
+                package_data['annual_price'] = package_data['monthly_price'] * 12 * 0.9
+            
             # Create package
             package = ClientPackage(**package_data)
-            db.session.add(package)
-            db.session.flush()  # Get the package ID
+            session.add(package)
+            session.flush()  # Get the package ID
             
             # Add features to package
             for feature_key in feature_keys:
-                feature = Feature.query.filter_by(feature_key=feature_key).first()
+                feature = session.query(Feature).filter_by(feature_key=feature_key).first()
                 if feature:
                     package_feature = PackageFeature(
                         package_id=package.id,
                         feature_id=feature.id,
                         is_included=True
                     )
-                    db.session.add(package_feature)
+                    session.add(package_feature)
+            
+            created_count += 1
     
-    db.session.commit()
-    print("✓ Packages initialized")
+    print(f"✓ Initialized {created_count} packages")
+    return created_count
 
 
 def init_client_packages():
     """Initialize the complete package system"""
+    from app.extensions import db
+    
     print("Initializing client packages...")
     
     try:
-        init_features()
-        init_packages()
-        print("✓ Client package system initialized successfully!")
-        return True
+        with db.session() as session:
+            features_created = init_features(session)
+            packages_created = init_packages(session)
+            session.commit()
+            print(f"✓ Client package system initialized successfully! ({features_created} features, {packages_created} packages)")
+            return True
     except Exception as e:
         print(f"✗ Error initializing packages: {e}")
-        db.session.rollback()
+        if 'session' in locals():
+            session.rollback()
         return False
 
 
