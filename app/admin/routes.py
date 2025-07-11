@@ -1276,24 +1276,26 @@ def api_docs():
 @admin_bp.route('/support-tickets', methods=['GET', 'POST'])
 @secure_admin_required
 def support_tickets():
-    """Support tickets management"""
-    tickets = SupportTicket.query.all()
+    """List and manage support tickets"""
+    tickets = SupportTicket.query.order_by(SupportTicket.created_at.desc()).all()
     return render_template('admin/support_tickets.html', tickets=tickets)
 
 # Settings Routes
 @admin_bp.route('/settings', methods=['GET', 'POST'])
-@login_required
-@admin_required
+@secure_admin_required
 def settings():
     """Show settings page"""
+    # Get the setting type from the request, default to SYSTEM
+    setting_type = request.args.get('type', SettingType.SYSTEM.value)
+    
     # Get all settings grouped by type
     settings = Setting.get_all_settings()
     
-    # Create form with current values
-    form = SettingForm(setting_type=request.args.get('type', SettingType.SYSTEM.value))
+    # Create form with the specified setting type
+    form = SettingForm(setting_type=setting_type)
     
     # Populate form fields with current values
-    for setting in settings.get(form.setting_type, []):
+    for setting in settings.get(setting_type, []):
         if setting.key in form.fields:
             form.fields[setting.key].data = setting.value
     
@@ -1302,8 +1304,7 @@ def settings():
                          form=form)
 
 @admin_bp.route('/settings/general')
-@login_required
-@admin_required
+@secure_admin_required
 def general_settings():
     """General system settings"""
     return render_template('admin/settings/general.html')
