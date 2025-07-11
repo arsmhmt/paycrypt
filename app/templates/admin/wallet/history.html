@@ -40,17 +40,31 @@
                             </td>
                             <td>#{{ payment.id }}</td>
                             <td>
-                                {{ payment.client.name }}
-                                <small class="text-muted">({{ payment.client.email }})</small>
+                                {% if raw_payments %}
+                                    {{ payment.get('client_name', 'N/A') }}
+                                    {% if payment.get('client_email') %}
+                                    <small class="text-muted">({{ payment.client_email }})</small>
+                                    {% endif %}
+                                {% else %}
+                                    {{ payment.client.name }}
+                                    <small class="text-muted">({{ payment.client.email }})</small>
+                                {% endif %}
                             </td>
                             <td>{{ payment.amount }}</td>
                             <td>{{ payment.currency }}</td>
                             <td>
-                                <span class="badge bg-{{ 'success' if payment.status == 'completed' else 'warning' }}">
-                                    {{ payment.status }}
+                                {% set status = payment.status.value if not raw_payments and payment.status is defined else (payment.status.value if not raw_payments else payment.status) %}
+                                <span class="badge bg-{{ 'success' if status|lower == 'completed' else 'warning' }}">
+                                    {{ status|title }}
                                 </span>
                             </td>
-                            <td>{{ payment.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td>
+                                {% if raw_payments %}
+                                    {{ payment.created_at.strftime('%Y-%m-%d %H:%M') if payment.created_at else 'N/A' }}
+                                {% else %}
+                                    {{ payment.created_at.strftime('%Y-%m-%d %H:%M') }}
+                                {% endif %}
+                            </td>
                         </tr>
                         {% endfor %}
                         

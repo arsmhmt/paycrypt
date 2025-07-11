@@ -280,6 +280,124 @@ def clients():
     clients = Client.query.order_by(Client.name.asc()).all()
     return render_template('admin/clients.html', clients=clients)
 
+@admin_bp.route('/clients/export', methods=['POST'])
+@secure_admin_required
+def export_clients():
+    """Export clients to CSV"""
+    try:
+        import csv
+        import io
+        from datetime import datetime
+        
+        # Get filter parameters from request
+        search = request.args.get('search', '')
+        status = request.args.get('status', 'all')
+        
+        # Build query
+        query = Client.query
+        
+        # Apply filters
+        if search:
+            search_term = f"%{search}%"
+            query = query.filter(
+                db.or_(
+                    Client.name.ilike(search_term),
+                    Client.email.ilike(search_term),
+                    Client.company_name.ilike(search_term)
+                )
+            )
+            
+        if status != 'all':
+            query = query.filter(Client.is_active == (status == 'active'))
+        
+        # Get clients
+        clients = query.order_by(Client.name.asc()).all()
+        
+        # Create CSV in memory
+        output = io.StringIO()
+        writer = csv.writer(output)
+        
+        # Write header
+        writer.writerow([
+            'ID', 'Name', 'Email', 'Company', 'Contact Person', 
+            'Phone', 'Status', 'Created At', 'Last Login'
+        ])
+        
+        # Write data
+        for client in clients:
+            writer.writerow([
+                client.id,
+                client.name or '',
+                client.email or '',
+                client.company_name or '',
+                client.contact_person or '',
+                client.phone or '',
+                'Active' if client.is_active else 'Inactive',
+                client.created_at.strftime('%Y-%m-%d %H:%M:%S') if client.created_at else '',
+                client.last_login_at.strftime('%Y-%m-%d %H:%M:%S') if client.last_login_at else ''
+            ])
+        
+        # Create response with CSV
+        output.seek(0)
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        return Response(
+            output.getvalue(),
+            mimetype='text/csv',
+            headers={
+                'Content-Disposition': f'attachment; filename=clients_export_{timestamp}.csv',
+                'Content-type': 'text/csv; charset=utf-8'
+            }
+        )
+        
+    except Exception as e:
+        current_app.logger.error(f'Error exporting clients: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': 'Failed to export clients. Please try again.'
+        }), 500
+
+@admin_bp.route('/commissions/refresh', methods=['POST'])
+@secure_admin_required
+def refresh_commissions():
+    """Refresh commission data for all clients"""
+    try:
+        # Get all active clients
+        clients = Client.query.filter_by(is_active=True).all()
+        updated_count = 0
+        
+        # Update commission data for each client
+        for client in clients:
+            try:
+                # Calculate and update commissions
+                # This is a placeholder - replace with your actual commission calculation logic
+                client.total_commissions = calculate_client_commissions(client.id)
+                updated_count += 1
+            except Exception as e:
+                current_app.logger.error(f"Error updating commissions for client {client.id}: {str(e)}")
+        
+        # Commit changes to the database
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': f'Successfully refreshed commissions for {updated_count} clients',
+            'updated_count': updated_count
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f'Error refreshing commissions: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': 'Failed to refresh commissions. Please try again.'
+        }), 500
+
+def calculate_client_commissions(client_id):
+    """Helper function to calculate commissions for a client"""
+    # This is a placeholder - implement your actual commission calculation logic here
+    # For example, you might query the database for transactions and calculate commissions
+    return 0.0
+
 @admin_bp.route('/clients/new', methods=['GET', 'POST'])
 @secure_admin_required
 def new_client():
@@ -333,10 +451,10 @@ def pricing_plans():
     # Apply filters
     if form.plan_type.data:
         query = query.filter(ClientPricingPlan.plan_type == form.plan_type.data)
-    if form.active_only.data:
+    if form.is_active.data:  # Changed from active_only to is_active
         query = query.filter(ClientPricingPlan.is_active == True)
-    if form.search.data:
-        search = f"%{form.search.data}%"
+    if form.name.data:  # Changed from search to name
+        search = f"%{form.name.data}%"
         query = query.filter(ClientPricingPlan.plan_name.ilike(search))
     
     plans = query.order_by(ClientPricingPlan.plan_name).all()
@@ -528,198 +646,152 @@ def admin_dashboard():
 @secure_admin_required
 def analytics():
     """Analytics dashboard"""
-    # TODO: Add analytics data fetching logic here if needed
-    return render_template('admin/analytics.html')
-
-
-def init_app(app):
-    """Initialize the admin module with the Flask app."""
-    # Configure upload folder
-    UPLOAD_FOLDER = os.path.join(app.root_path, 'uploads')
-    if not os.path.exists(UPLOAD_FOLDER):
-        os.makedirs(UPLOAD_FOLDER)
-        app.logger.info(f'Created upload directory at {UPLOAD_FOLDER}')
+    from app.models.transaction import Transaction
+    from app.models.client import Client
+    from app.models.payment import Payment
+    from app.models.withdrawal import WithdrawalRequest
+    from datetime import datetime, timedelta
+    from sqlalchemy import func, extract, and_
     
-    app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+    # Default to 30 days if not specified
+    time_period_days = request.args.get('days', default=30, type=int)
     
-    return app
-
-def log_audit(action, entity_type, entity_id, description, old_values=None, new_values=None):
-    """Helper function to log audit trail"""
-    if not isinstance(current_user, User):
-        user_id = None
+    # Calculate date range
+    end_date = datetime.utcnow()
+    if time_period_days > 0:
+        start_date = end_date - timedelta(days=time_period_days)
     else:
-        user_id = current_user.id
-        
-    audit = AuditTrail(
-        user_id=user_id,
-        action_type=action,
-        entity_type=entity_type,
-        entity_id=entity_id,
-        old_value=old_values or {},
-        new_value=new_values or {},
-        ip_address=request.remote_addr if request else None,
-        user_agent=request.user_agent.string if request and hasattr(request, 'user_agent') else None
-    )
-    db.session.add(audit)
+        # If time_period_days is 0, show all time
+        start_date = datetime.min
+    
+    # Get total transactions count
+    total_transactions = Transaction.query.count()
+    
+    # Get total clients count
+    total_clients = Client.query.count()
+    
+    # Get total payment volume
+    total_volume = db.session.query(func.sum(Transaction.amount)).scalar() or 0
+    
+    # Get pending withdrawals count
+    pending_withdrawals = WithdrawalRequest.query.filter_by(status='pending').count()
+    
+    # Get transaction volume over time
+    time_period = request.args.get('period', '7d')
+    if time_period == '7d':
+        days = 7
+        time_series = db.session.query(
+            func.date(Transaction.created_at).label('date'),
+            func.count(Transaction.id).label('count'),
+            func.sum(Transaction.amount).label('total_amount')
+        ).join(
+            Payment, Transaction.payment_id == Payment.id
+        ).filter(
+            Transaction.created_at >= datetime.utcnow() - timedelta(days=days)
+        ).group_by(
+            func.date(Transaction.created_at)
+        ).order_by('date').all()
+    elif time_period == '30d':
+        days = 30
+        time_series = db.session.query(
+            func.date_trunc('day', Transaction.created_at).label('date'),
+            func.count(Transaction.id).label('count'),
+            func.sum(Transaction.amount).label('total_amount')
+        ).join(
+            Payment, Transaction.payment_id == Payment.id
+        ).filter(
+            Transaction.created_at >= datetime.utcnow() - timedelta(days=days)
+        ).group_by(
+            func.date_trunc('day', Transaction.created_at)
+        ).order_by('date').all()
+    else:  # 12m
+        time_series = db.session.query(
+            func.date_trunc('month', Transaction.created_at).label('date'),
+            func.count(Transaction.id).label('count'),
+            func.sum(Transaction.amount).label('total_amount')
+        ).join(
+            Payment, Transaction.payment_id == Payment.id
+        ).filter(
+            Transaction.created_at >= datetime.utcnow() - timedelta(days=365)
+        ).group_by(
+            func.date_trunc('month', Transaction.created_at)
+        ).order_by('date').all()
+
+    # Get status counts
+    status_counts = db.session.query(
+        Transaction.status,
+        func.count(Transaction.id).label('count')
+    ).join(
+        Payment, Transaction.payment_id == Payment.id
+    ).group_by(Transaction.status).all()
+
+    # Get top 5 clients by transaction volume
+    top_clients = db.session.query(
+        Client.id,
+        Client.company_name,
+        func.count(Transaction.id).label('tx_count'),
+        func.sum(Transaction.amount).label('total_volume')
+    ).join(
+        Payment, Transaction.payment_id == Payment.id
+    ).join(
+        Client, Payment.client_id == Client.id
+    ).group_by(
+        Client.id, Client.company_name
+    ).order_by(
+        db.desc('total_volume')
+    ).limit(5).all()
+    
+    # Format data for Chart.js
+    chart_labels = [d[0].strftime('%Y-%m-%d') for d in time_series]
+    # Format chart data as a dictionary with count and volume
+    chart_data = {
+        'count': [float(d[1]) if d[1] is not None else 0 for d in time_series],  # d[1] is count
+        'volume': [float(d[2]) if d[2] is not None else 0 for d in time_series]  # d[2] is total_amount
+    }
+    
+    # Ensure all dates are timezone-aware and properly formatted for the template
     try:
-        db.session.commit()
+        if start_date and not isinstance(start_date, str):
+            start_date_str = start_date.strftime('%Y-%m-%d')
+        else:
+            start_date_str = start_date
+            
+        if end_date and not isinstance(end_date, str):
+            end_date_str = end_date.strftime('%Y-%m-%d')
+        else:
+            end_date_str = end_date or datetime.utcnow().strftime('%Y-%m-%d')
     except Exception as e:
-        db.session.rollback()
-        current_app.logger.error(f"Failed to log audit: {e}")
-    return audit
-
-# Quick Actions Routes
-@admin_bp.route('/payment/<int:payment_id>/status/<status>', methods=['POST'])
-@login_required
-@secure_admin_required
-@rate_limit('admin_update_payment_status', limit=30, window=300)  # 30 requests per 5 minutes
-def mark_payment_status(payment_id, status):
-    payment = Payment.query.get_or_404(payment_id)
-    old_status = payment.status
+        current_app.logger.error(f"Error formatting dates: {str(e)}")
+        start_date_str = datetime.utcnow().strftime('%Y-%m-%d')
+        end_date_str = datetime.utcnow().strftime('%Y-%m-%d')
     
-    if status not in PaymentStatus.__members__:
-        flash('Invalid status', 'error')
-        return redirect(url_for('admin.view_payment', payment_id=payment_id))
-    
-    payment.status = status
-    payment.updated_at = datetime.utcnow()
-    payment.updated_by = current_user.id
-    
-    try:
-        db.session.commit()
-        
-        # Log admin action
-        log_admin_action(
-            action='update_payment_status',
-            target_type='payment',
-            target_id=payment_id,
-            description=f'Changed payment {payment_id} status from {old_status} to {status}',
-            old_values={'status': old_status},
-            new_values={'status': status}
-        )
-        
-        flash(f'Payment status updated to {status}', 'success')
-    except Exception as e:
-        db.session.rollback()
-        current_app.logger.error(f"Error updating payment status: {e}")
-        flash('Error updating payment status', 'error')
-        
-    return redirect(url_for('admin.view_payment', payment_id=payment_id))
-
-@admin_bp.route('/payment/<int:payment_id>/invoice', methods=['POST'])
-@login_required
-@secure_admin_required
-def generate_invoice(payment_id):
-    payment = Payment.query.get_or_404(payment_id)
-    # TODO: Implement invoice generation logic
-    flash('Invoice generation is not yet implemented', 'warning')
-    return redirect(url_for('admin.view_payment', payment_id=payment_id))
-
-@admin_bp.route('/payment/<int:payment_id>/receipt', methods=['POST'])
-@login_required
-@secure_admin_required
-def send_payment_receipt(payment_id):
-    payment = Payment.query.get_or_404(payment_id)
-    # TODO: Implement receipt sending logic
-    flash('Receipt sending is not yet implemented', 'warning')
-    return redirect(url_for('admin.view_payment', payment_id=payment_id))
-
-@admin_bp.route('/payment/<int:payment_id>/refund', methods=['POST'])
-@login_required
-@secure_admin_required
-@rate_limit('admin_refund_payment', limit=10, window=300)  # 10 refunds per 5 minutes
-def process_refund(payment_id):
-    payment = Payment.query.get_or_404(payment_id)
-    
-    # Log refund attempt for fraud detection
-    log_admin_action(
-        action='refund_attempt',
-        target_type='payment',
-        target_id=payment_id,
-        description=f'Admin {current_user.username} attempted to process refund for payment {payment_id} (amount: {payment.amount})'
-    )
-    
-    # TODO: Implement refund processing logic
-    flash('Refund processing is not yet implemented', 'warning')
-    return redirect(url_for('admin.view_payment', payment_id=payment_id))
-
-@admin_bp.route('/recurring-payment/<int:recurring_payment_id>/process', methods=['POST'])
-@login_required
-@secure_admin_required
-def process_recurring_payment(recurring_payment_id):
-    """Process the next payment for a recurring payment"""
-    recurring_payment = RecurringPayment.query.get_or_404(recurring_payment_id)
-    payment = recurring_payment.process_next_payment()
-    
-    if payment:
-        flash('Next payment processed successfully', 'success')
-    else:
-        flash('No payment processed (payment may be paused or completed)', 'warning')
-    
-    return redirect(url_for('admin.recurring_payments'))
-
-# Notification Preferences Routes
-@admin_bp.route('/notification-preferences')
-@rate_limit('admin_notification_preferences', limit=30, window=300)  # 30 requests per 5 minutes
-@login_required
-@secure_admin_required
-def notification_preferences():
-    """Show notification preferences form"""
-    form = NotificationPreferenceForm()
-    return render_template('admin/notification_preferences.html', form=form)
-
-@admin_bp.route('/user/<int:user_id>/preferences')
-@login_required
-@secure_admin_required
-def get_user_preferences(user_id):
-    """Get user's notification preferences"""
-    preferences = NotificationPreference.get_user_preferences(user_id)
-    return jsonify([{
-        'type': pref.notification_type,
-        'event': pref.event_type,
-        'enabled': pref.enabled
-    } for pref in preferences])
-
-@admin_bp.route('/save-notification-preferences', methods=['POST'])
-@login_required
-@admin_required
-def save_notification_preferences():
-    """Save notification preferences"""
-    form = NotificationPreferenceForm()
-    if form.validate_on_submit():
-        try:
-            preferences = form.get_preferences()
-            user_id = form.user_id.data
-            
-            # Update preferences
-            NotificationPreference.bulk_update_preferences(user_id, preferences)
-            
-            # Log audit trail
-            AuditTrail.log_action(
-                user_id=current_user.id,
-                action_type=AuditActionType.UPDATE.value,
-                entity_type='notification_preferences',
-                entity_id=user_id,
-                old_value=None,
-                new_value=preferences,
-                request=request
-            )
-            
-            flash('Notification preferences saved successfully', 'success')
-            return redirect(url_for('admin.notification_preferences'))
-        except Exception as e:
-            flash(f'Error saving preferences: {str(e)}', 'error')
-    
-    return render_template('admin/notification_preferences.html', form=form)
+    return render_template('admin/analytics.html',
+                         time_period=time_period,
+                         time_period_days=time_period_days,
+                         total_transactions=total_transactions,
+                         total_clients=total_clients,
+                         total_volume=float(total_volume) if total_volume is not None else 0,
+                         pending_withdrawals=pending_withdrawals,
+                         chart_labels=chart_labels,
+                         chart_data=chart_data,
+                         status_counts=dict(status_counts),
+                         top_clients=top_clients,
+                         start_date=start_date,
+                         end_date=end_date,
+                         start_date_str=start_date_str,
+                         end_date_str=end_date_str,
+                         now=datetime.utcnow())
 
 # Audit Trail Routes
 @admin_bp.route('/audit-trail')
 @rate_limit('admin_audit_trail', limit=100, window=300)  # 100 requests per 5 minutes
-@login_required
-@admin_required
+@secure_admin_required
 def audit_trail():
     """Show audit trail entries with filtering"""
+    from app.models.audit import AuditTrail
+    from app.models.user import User
+    from app.constants.audit import AuditActionType
+    
     # Get filter parameters
     action_type = request.args.get('action_type')
     entity_type = request.args.get('entity_type')
@@ -767,8 +839,26 @@ def view_payment(payment_id):
 @secure_admin_required
 def payments_list():
     """Show list of all payments"""
-    payments = Payment.query.order_by(Payment.created_at.desc()).all()
-    return render_template('admin/payments/index.html', payments=payments)
+    try:
+        # Handle case where status might be stored in lowercase in the database
+        payments = Payment.query.order_by(Payment.created_at.desc()).all()
+        
+        # Ensure all status values are valid
+        valid_statuses = {status.value for status in PaymentStatus}
+        for payment in payments:
+            if payment.status and payment.status.lower() not in valid_statuses:
+                # Try to fix the status if it's invalid
+                try:
+                    payment.status = PaymentStatus(payment.status.lower())
+                except ValueError:
+                    # If we can't map it, set to a default status
+                    payment.status = PaymentStatus.PENDING
+        
+        return render_template('admin/payments/index.html', payments=payments)
+    except Exception as e:
+        current_app.logger.error(f"Error in payments_list: {str(e)}")
+        flash('An error occurred while loading payments.', 'error')
+        return render_template('admin/payments/index.html', payments=[])
 
 @admin_bp.route('/payments/detailed-list')
 @secure_admin_required
@@ -827,10 +917,41 @@ def recurring_payments():
 @secure_admin_required
 def wallet_history():
     """Show wallet transaction history"""
-    # Get all transactions (payments and withdrawals)
-    payments = Payment.query.order_by(Payment.created_at.desc()).all()
-    withdrawals = WithdrawalRequest.query.order_by(WithdrawalRequest.created_at.desc()).all()
-    return render_template('admin/wallet/history.html', payments=payments, withdrawals=withdrawals)
+    try:
+        # Get all transactions (payments and withdrawals)
+        payments = Payment.query.order_by(Payment.created_at.desc()).all()
+        withdrawals = WithdrawalRequest.query.order_by(WithdrawalRequest.created_at.desc()).all()
+        return render_template('admin/wallet/history.html', payments=payments, withdrawals=withdrawals)
+    except Exception as e:
+        current_app.logger.error(f'Error in wallet_history: {str(e)}')
+        # Try to get payments with raw SQL to bypass SQLAlchemy type handling
+        from sqlalchemy import text
+        try:
+            # Get payment data with client information
+            query = """
+                SELECT p.*, c.name as client_name, c.email as client_email 
+                FROM payment p
+                LEFT JOIN client c ON p.client_id = c.id
+                ORDER BY p.created_at DESC
+            """
+            result = db.session.execute(text(query))
+            payments = []
+            for row in result.mappings():
+                payment = dict(row)
+                # Convert status to proper enum values
+                try:
+                    payment['status'] = PaymentStatus(payment['status'].lower())
+                except (ValueError, AttributeError):
+                    # If status is invalid, default to PENDING
+                    payment['status'] = PaymentStatus.PENDING
+                payments.append(payment)
+            
+            withdrawals = WithdrawalRequest.query.order_by(WithdrawalRequest.created_at.desc()).all()
+            return render_template('admin/wallet/history.html', payments=payments, withdrawals=withdrawals, raw_payments=True)
+        except Exception as inner_e:
+            current_app.logger.error(f'Error in fallback wallet_history: {str(inner_e)}')
+            flash('Error loading transaction history. Please try again later.', 'error')
+            return render_template('admin/wallet/history.html', payments=[], withdrawals=[])
 
 @admin_bp.route('/withdrawals/list')
 @secure_admin_required

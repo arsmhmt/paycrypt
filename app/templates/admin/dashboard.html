@@ -3,6 +3,18 @@
 {% block title %}{{ _('Dashboard') }} - Paycrypt Admin{% endblock %}
 
 {% block content %}
+{% set admin_prefix = url_for('admin.admin_dashboard')|replace('/dashboard', '') %}
+{% set base_url = url_for('admin.admin_dashboard')|replace('/admin120724/dashboard', '') %}
+
+<!-- Add base URL configuration for JavaScript -->
+<script>
+    window.APP_CONFIG = {
+        baseUrl: '{{ base_url }}',
+        adminPrefix: '{{ admin_prefix }}',
+        csrfToken: '{{ csrf_token() }}'
+    };
+</script>
+
 <div class="container-fluid">
     <!-- Page Heading -->
     <div class="d-flex flex-column flex-md-row align-items-center justify-content-between mb-4">
@@ -533,9 +545,9 @@
                             <span class="small">{{ _('System Load') }}</span>
                             <span class="small text-muted">{{ stats.get('system_load', '12') }}%</span>
                         </div>
-                        <div class="progress mb-3" style="height: 4px;">
-                            <div class="progress-bar bg-success" style="width: {{ stats.get('system_load', 12) }}%">
-                            </div>
+                        {% set system_load = stats.get('system_load', 12) %}
+                        <div class="progress mb-3 slim-progress-bar">
+                            <div class="progress-bar bg-success" style="width: {{ system_load }}%;"></div>
                         </div>
 
                         <!-- Uptime -->
@@ -992,108 +1004,180 @@
 
     // Volume Trends Chart
     function initVolumeTrendsChart() {
-        if (window.volumeTrendsChartInstance) {
-            window.volumeTrendsChartInstance.destroy();
-        }
         try {
+            // Default data and labels
+            var defaultData = [10, 20, 15, 30, 25, 40, 35];
+            var defaultLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+            
+            // Initialize chart data and labels with defaults
+            var chartData = defaultData.slice();
+            var chartLabels = defaultLabels.slice();
+            
+            // Parse chart data from template if available
+            try {
+                // Get chart data from template if defined
+                var templateDataStr = '{{ chart_data | tojson | safe if chart_data is defined else "" }}';
+                if (templateDataStr) {
+                    var templateData = JSON.parse(templateDataStr);
+                    if (Array.isArray(templateData) && templateData.length > 0) {
+                        chartData = templateData;
+                    }
+                }
+                
+                // Get chart labels from template if defined
+                var templateLabelsStr = '{{ chart_labels | tojson | safe if chart_labels is defined else "" }}';
+                if (templateLabelsStr) {
+                    var templateLabels = JSON.parse(templateLabelsStr);
+                    if (Array.isArray(templateLabels) && templateLabels.length > 0) {
+                        chartLabels = templateLabels;
+                    }
+                }
+                
+                // Ensure we have matching lengths for data and labels
+                if (chartData.length !== chartLabels.length) {
+                    console.warn('Chart data and labels length mismatch. Using default labels.');
+                    chartLabels = defaultLabels.slice(0, chartData.length);
+                }
+                
+            } catch (e) {
+                console.error('Error parsing chart data:', e);
+                chartData = defaultData;
+                chartLabels = defaultLabels;
+            }
+            
+            // Clean up any existing chart instance
+            if (window.volumeTrendsChartInstance) {
+                try {
+                    window.volumeTrendsChartInstance.destroy();
+                } catch (e) {
+                    console.warn('Error destroying previous chart instance:', e);
+                }
+            }
+            
+            // Initialize chart options
             var options = {
                 series: [{
                     name: 'Transaction Volume',
-                    data: {{ chart_data | default([10, 20, 15, 30, 25, 40, 35]) | tojson
-        }}
+                    data: chartData
                 }],
-    chart: {
-        height: 350,
-            type: 'area',
-                toolbar: {
-            show: true,
-                tools: {
-                download: true,
-                    selection: true,
-                        zoom: true,
+                chart: {
+                    height: 350,
+                    type: 'area',
+                    toolbar: {
+                        show: true,
+                        tools: {
+                            download: true,
+                            selection: true,
+                            zoom: true,
                             zoomin: true,
-                                zoomout: true,
-                                    pan: true,
-                                        reset: true
-            }
-        },
-        zoom: { enabled: true },
-        animations: {
-            enabled: true,
-                easing: 'easeinout',
-                    speed: 800,
+                            zoomout: true,
+                            pan: true,
+                            reset: true
+                        }
+                    },
+                    zoom: { 
+                        enabled: true 
+                    },
+                    animations: {
+                        enabled: true,
+                        easing: 'easeinout',
+                        speed: 800,
                         animateGradually: {
-                enabled: true,
-                    delay: 150
-            }
-        },
-        foreColor: '#6c757d',
-            fontFamily: 'inherit'
-    },
-    colors: ['#4e73df'],
-        dataLabels: { enabled: false },
-    stroke: {
-        curve: 'smooth',
-            width: 3,
-                lineCap: 'round'
-    },
-    xaxis: {
-        categories: { { chart_labels | default (["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]) | tojson } },
-        axisBorder: { show: false },
-        axisTicks: { show: false },
-        labels: {
-            style: {
-                colors: '#6c757d',
-                    fontSize: '12px',
-                        fontFamily: 'inherit'
-            }
-        }
-    },
-    yaxis: {
-        labels: {
-            style: {
-                colors: '#6c757d',
-                    fontSize: '12px',
-                        fontFamily: 'inherit'
-            },
-            formatter: function (value) {
-                return value.toFixed(6) + ' BTC';
-            }
-        }
-    },
-    grid: {
-        borderColor: '#f1f1f1',
-            strokeDashArray: 5,
-                xaxis: { lines: { show: true } },
-        yaxis: { lines: { show: true } }
-    },
-    tooltip: {
-        theme: 'light',
-            y: { formatter: function(val) { return val.toFixed(6) + ' BTC'; } },
-        marker: { show: true }
-    },
-    fill: {
-        type: 'gradient',
-            gradient: {
-            shadeIntensity: 1,
-                opacityFrom: 0.6,
-                    opacityTo: 0.1,
+                            enabled: true,
+                            delay: 150
+                        }
+                    },
+                    foreColor: '#6c757d',
+                    fontFamily: 'inherit'
+                },
+                colors: ['#4e73df'],
+                dataLabels: { 
+                    enabled: false 
+                },
+                stroke: {
+                    curve: 'smooth',
+                    width: 3,
+                    lineCap: 'round'
+                },
+                xaxis: {
+                    categories: chartLabels,
+                    axisBorder: { 
+                        show: false 
+                    },
+                    axisTicks: { 
+                        show: false 
+                    },
+                    labels: {
+                        style: {
+                            colors: '#6c757d',
+                            fontSize: '12px',
+                            fontFamily: 'inherit'
+                        }
+                    }
+                },
+                yaxis: {
+                    labels: {
+                        style: {
+                            colors: '#6c757d',
+                            fontSize: '12px',
+                            fontFamily: 'inherit'
+                        },
+                        formatter: function(value) {
+                            return parseFloat(value).toFixed(6) + ' BTC';
+                        }
+                    }
+                },
+                grid: {
+                    borderColor: '#f1f1f1',
+                    strokeDashArray: 5,
+                    xaxis: { 
+                        lines: { 
+                            show: true 
+                        } 
+                    },
+                    yaxis: { 
+                        lines: { 
+                            show: true 
+                        } 
+                    }
+                },
+                tooltip: {
+                    theme: 'light',
+                    y: { 
+                        formatter: function(val) { 
+                            return val.toFixed(6) + ' BTC'; 
+                        } 
+                    },
+                    marker: { 
+                        show: true 
+                    }
+                },
+                fill: {
+                    type: 'gradient',
+                    gradient: {
+                        shadeIntensity: 1,
+                        opacityFrom: 0.6,
+                        opacityTo: 0.1,
                         stops: [0, 95, 100]
-        }
-    }
+                    }
+                }
             };
 
-    var chart = new ApexCharts(document.querySelector("#volumeTrendsChart"), options);
-    chart.render().then(() => {
-        document.getElementById('volumeTrendsChartFallback').style.display = 'none';
-        window.volumeTrendsChartInstance = chart;
-        console.log('Volume trends chart rendered');
-    }).catch(() => {
-        document.getElementById('volumeTrendsChartFallback').style.display = 'block';
-    });
-} catch (e) {
-        document.getElementById('volumeTrendsChartFallback').style.display = 'block';
-        console.error('Error initializing volume trends chart:', e);
+            // Initialize and render the chart
+            var chart = new ApexCharts(document.querySelector("#volumeTrendsChart"), options);
+            chart.render().then(() => {
+                document.getElementById('volumeTrendsChartFallback').style.display = 'none';
+                window.volumeTrendsChartInstance = chart;
+                console.log('Volume trends chart rendered');
+            }).catch((error) => {
+                console.error('Error rendering chart:', error);
+                document.getElementById('volumeTrendsChartFallback').style.display = 'block';
+            });
+            
+        } catch (e) {
+            console.error('Error initializing volume trends chart:', e);
+            document.getElementById('volumeTrendsChartFallback').style.display = 'block';
+        }
     }
     // Top Cryptocurrencies Chart
     function initTopCryptosChart() {
@@ -1450,21 +1534,91 @@
         });
     }
 
-    function hideLoadingState() {
-        // Remove loading overlays
-        const overlays = document.querySelectorAll('.loading-overlay');
-        overlays.forEach(function (overlay) {
-            overlay.remove();
+        // Real-time currency rates update
+        function updateCurrencyRates() {
+            // This would typically fetch real-time rates from an API
+            // For demo purposes, we'll simulate rate updates
+
+            const btcPrice = document.getElementById('btc-price');
+            const ethPrice = document.getElementById('eth-price');
+            const usdtPrice = document.getElementById('usdt-price');
+            const btcChange = document.getElementById('btc-change');
+            const ethChange = document.getElementById('eth-change');
+            const timestamp = document.getElementById('rates-timestamp');
+
+            if (btcPrice && ethPrice && timestamp) {
+                // Simulate price fluctuations
+                const btcVariation = (Math.random() - 0.5) * 1000; // ±$500 variation
+                const ethVariation = (Math.random() - 0.5) * 100;  // ±$50 variation
+
+                const currentBtc = parseFloat(btcPrice.textContent.replace(/,/g, '')) + btcVariation;
+                const currentEth = parseFloat(ethPrice.textContent.replace(/,/g, '')) + ethVariation;
+
+                btcPrice.textContent = new Intl.NumberFormat().format(Math.round(currentBtc));
+                ethPrice.textContent = new Intl.NumberFormat().format(Math.round(currentEth));
+
+                // Update change percentages
+                const btcChangePercent = ((Math.random() - 0.5) * 10).toFixed(1); // ±5% variation
+                const ethChangePercent = ((Math.random() - 0.5) * 8).toFixed(1);  // ±4% variation
+
+                btcChange.textContent = (btcChangePercent > 0 ? '+' : '') + btcChangePercent + '%';
+                ethChange.textContent = (ethChangePercent > 0 ? '+' : '') + ethChangePercent + '%';
+
+                // Update colors based on change
+                btcChange.className = btcChangePercent > 0 ? 'text-success' : 'text-danger';
+                ethChange.className = ethChangePercent > 0 ? 'text-success' : 'text-danger';
+
+                // Update timestamp
+                timestamp.textContent = new Date().toLocaleTimeString();
+            }
+        }
+
+        // Loading state functions
+        function showLoadingState() {
+            // Add loading overlays to dashboard sections
+            const sections = document.querySelectorAll('.card-body');
+            sections.forEach(function (section) {
+                const overlay = document.createElement('div');
+                overlay.className = 'loading-overlay d-flex align-items-center justify-content-center';
+                overlay.style.cssText = 'position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 10;';
+                overlay.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>';
+
+                if (section.style.position !== 'relative') {
+                    section.style.position = 'relative';
+                }
+                section.appendChild(overlay);
+            });
+        }
+
+        function hideLoadingState() {
+            // Remove loading overlays
+            const overlays = document.querySelectorAll('.loading-overlay');
+            overlays.forEach(function (overlay) {
+                overlay.remove();
+            });
+        }
+
+        // Initialize real-time updates
+        document.addEventListener('DOMContentLoaded', function () {
+            // Set up base URLs
+            const baseUrl = '{{ url_for("admin.admin_dashboard")|replace("/admin120724/dashboard", "") }}';
+            const adminPrefix = '{{ url_for("admin.admin_dashboard")|replace("/dashboard", "") }}';
+
+            // Set up AJAX headers
+            $.ajaxSetup({
+                beforeSend: function (xhr, settings) {
+                    if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token() }}');
+                    }
+                }
+            });
+
+            // Update currency rates every 30 seconds
+            setInterval(updateCurrencyRates, 30000);
+
+            // Initialize balance chart on page load
+            initClientBalancesChart();
         });
-    }
-
-    // Initialize real-time updates
-    document.addEventListener('DOMContentLoaded', function () {
-        // Update currency rates every 30 seconds
-        setInterval(updateCurrencyRates, 30000);
-
-        // Initialize balance chart on page load
-        initClientBalancesChart();
-    });
+    </script>
 </script>
 {% endblock %}

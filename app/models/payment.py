@@ -31,7 +31,20 @@ class Payment(BaseModel):
     rate_expiry = db.Column(db.DateTime, nullable=True)            # When the rate expires
     
     # Payment details
-    status = db.Column(db.Enum(PaymentStatus), default=PaymentStatus.PENDING)
+    _status = db.Column('status', db.Enum(PaymentStatus), nullable=False, default=PaymentStatus.PENDING)
+    
+    @property
+    def status(self):
+        return self._status
+        
+    @status.setter
+    def status(self, value):
+        if isinstance(value, str):
+            # Handle string input by converting to enum, case-insensitive
+            self._status = PaymentStatus(value.lower())
+        else:
+            self._status = value
+            
     payment_method = db.Column(db.String(50), nullable=False)
     transaction_id = db.Column(db.String(255), unique=True)
     description = db.Column(db.String(255))

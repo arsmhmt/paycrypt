@@ -11,6 +11,13 @@ if project_root not in sys.path:
 # Set the FLASK_APP environment variable
 os.environ['FLASK_APP'] = 'wsgi.py'
 
+# Set up Flask environment
+os.environ['FLASK_ENV'] = os.getenv('FLASK_ENV', 'development')
+
+# Make sure we're importing from the correct directory
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
 # Configure logging
 log_level = logging.INFO if os.getenv('FLASK_ENV') == 'production' else logging.DEBUG
 logging.basicConfig(
@@ -20,10 +27,14 @@ logging.basicConfig(
 )
 
 # Initialize the application
-from app import create_app
+from app import create_app, db
+from flask_migrate import Migrate
 
 # Create the application instance
 application = create_app()
+
+# Initialize Flask-Migrate
+migrate = Migrate(application, db)
 
 # Log successful startup
 application.logger.info("Application started successfully")

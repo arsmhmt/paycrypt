@@ -1,6 +1,7 @@
 import os
 import sys
 from dotenv import load_dotenv
+from flask_migrate import Migrate
 
 # Load environment variables from .env file
 load_dotenv()
@@ -10,25 +11,26 @@ app_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(app_dir)
 
 # Import create_app after path is set
-from app import create_app
+from app import create_app, db
 
 # Create the application instance
 app = create_app()
 
-# Register Flask-Migrate commands
-@app.cli.command("db")
-def db_command():
-    """Run database management commands."""
-    pass
+# Initialize Flask-Migrate
+migrate = Migrate(app, db)
 
 @app.cli.command("init-db")
 def init_db():
     """Initialize the database."""
-    from app.extensions.extensions import db
     with app.app_context():
-        db.drop_all()
+        # Create tables
         db.create_all()
-        print("Database initialized successfully!")
+        print("Database tables created successfully!")
+        
+        # Run migrations
+        from flask_migrate import upgrade
+        upgrade()
+        print("Database migrations applied successfully!")
 
 if __name__ == '__main__':
     debug = os.getenv("FLASK_DEBUG", "false").lower() == "true"
@@ -38,11 +40,15 @@ if __name__ == '__main__':
     if debug:
         with app.app_context():
             print("\nInitializing database...")
-            from app.extensions.extensions import db
             try:
-                db.drop_all()
+                # Create tables if they don't exist
                 db.create_all()
-                print("Database initialized successfully!")
+                print("Database tables created successfully!")
+                
+                # Apply any pending migrations
+                from flask_migrate import upgrade
+                upgrade()
+                print("Database migrations applied successfully!")
             except Exception as e:
                 print(f"Error initializing database: {e}")
                 raise
